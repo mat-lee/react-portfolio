@@ -215,8 +215,8 @@ function App() {
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Let's Connect</h2>
             <div className="w-24 h-1 bg-gradient-to-r from-blue-600 to-purple-600 mx-auto mb-6 rounded-full"></div>
             <p className="text-lg lg:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
-              I'm always open to discussing new opportunities, interesting projects, 
-              or just having a conversation about technology and innovation.
+              I'm always open to discussing opportunities, projects, 
+              or just having a conversation!
             </p>
           </div>
           
