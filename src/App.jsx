@@ -137,8 +137,9 @@ function App() {
                 pursuing a dual major in Computer Science and Mathematics.
               </p>
               <p className="text-lg lg:text-xl text-gray-600 leading-relaxed mb-8">
-                Machine learning and artificial intelligence are my main interests. I'm passionate about 
-                using these technologies to solve real-world problems and create meaningful impact.
+                 I have a deep passion for learning—while my main interests are machine learning and artificial intelligence, there's always something new to explore in the world of technology. 
+                 I'm constantly seeking out new challenges and opportunities to grow my skills, and I am passionate about using these technologies to solve real world problems and create a meaningful impact
+                 in the world.
               </p>
               <p className="text-lg text-gray-600 leading-relaxed">
                 <span className="font-medium">Focus areas:</span> UNC Chapel Hill, Computer Science, Mathematics, Machine Learning, AI
@@ -170,6 +171,31 @@ function App() {
                   </p>
                   <a 
                     href="https://github.com/mat-lee/tetris-reinforcement-learning"
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-gray-600 hover:text-gray-900 transition-colors underline"
+                  >
+                    View Project →
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg p-8 shadow-sm hover:shadow-md transition-shadow duration-300">
+              <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between lg:space-x-8">
+                <div className="flex-1">
+                  <h3 className="text-xl lg:text-2xl font-semibold text-gray-900 mb-4">
+                    Traffic Accident Severity Prediction
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed mb-6">
+                    A machine learning project that predicts the severity of traffic accidents using various
+                    features such as weather conditions, time of day, and location.
+                  </p>
+                  <p className="text-gray-500 text-sm mb-6">
+                    <span className="font-medium">Technologies:</span> Data Analysis, Pandas, Scikit-Learn, Machine Learning
+                  </p>
+                  <a 
+                    href="https://mat-lee-traffic-demo.streamlit.app/"
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="text-gray-600 hover:text-gray-900 transition-colors underline"
