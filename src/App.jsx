@@ -793,7 +793,7 @@ function ProjectsSection() {
 
             {/* Project 3 */}
             <ProjectCard
-              title="Advice Aggregator Website"
+              title="Advice Aggregator Website (In Development)"
               description="An ongoing web app that scrapes and clusters advice across multiple online sources. Uses NLP techniques to group similar insights and display them in a clean, searchable interface."
               link="https://github.com/mat-lee/advice-website"
               linkText="GitHub"
