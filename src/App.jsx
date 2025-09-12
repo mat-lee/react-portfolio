@@ -793,12 +793,13 @@ function ProjectsSection() {
 
             {/* Project 3 */}
             <ProjectCard
-              title="Advice Aggregator Website (In Development)"
+              title="Advice Aggregator Website"
               description="An ongoing web app that scrapes and clusters advice across multiple online sources. Uses NLP techniques to group similar insights and display them in a clean, searchable interface."
-              link="https://github.com/mat-lee/advice-website"
-              linkText="GitHub"
+              link="https://mat-lee.github.io/advice-website/"
+              linkText="Link"
+              github="https://github.com/mat-lee/advice-website"
               tags={["Web scraping", "NLP", "Clustering", "Full-stack"]}
-              status="Ongoing project – actively in development"
+              status="Ongoing project"
             />
           </div>
         </div>
@@ -819,6 +820,12 @@ function ProjectCard({ title, description, link, linkText = "Demo", github, tags
     transition: 'color 0.2s'
   };
 
+  const getStatusColor = (status) => {
+    if (status.toLowerCase().includes("ongoing")) return "#facc15"; // yellow
+    if (status.toLowerCase().includes("public") || status.toLowerCase().includes("complete")) return "#22c55e"; // green
+    return "#ef4444"; // red
+  };
+
   return (
     <div
       style={{
@@ -836,7 +843,7 @@ function ProjectCard({ title, description, link, linkText = "Demo", github, tags
       onMouseEnter={(e) => (e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)')}
       onMouseLeave={(e) => (e.currentTarget.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1)')}
     >
-      {/* Header: title + links */}
+      {/* Header */}
       <div
         style={{
           marginBottom: '12px',
@@ -847,8 +854,6 @@ function ProjectCard({ title, description, link, linkText = "Demo", github, tags
         }}
       >
         <h3 style={{ fontSize: '18px', fontWeight: 600, margin: 0 }}>{title}</h3>
-
-        {/* Link group (Demo + optional GitHub) */}
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
           {link && (
             <a
@@ -863,7 +868,6 @@ function ProjectCard({ title, description, link, linkText = "Demo", github, tags
               {linkText} <ExternalLink size={16} />
             </a>
           )}
-
           {github && (
             <a
               href={github}
@@ -881,26 +885,12 @@ function ProjectCard({ title, description, link, linkText = "Demo", github, tags
       </div>
 
       {/* Description */}
-      <p
-        style={{
-          fontSize: '14px',
-          color: '#374151',
-          marginBottom: '16px',
-          flex: 1
-        }}
-      >
+      <p style={{ fontSize: '14px', color: '#374151', marginBottom: '16px', flex: 1 }}>
         {description}
       </p>
 
       {/* Tags */}
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '8px',
-          marginBottom: '16px'
-        }}
-      >
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
         {tags.map((tag) => (
           <span
             key={tag}
@@ -921,16 +911,17 @@ function ProjectCard({ title, description, link, linkText = "Demo", github, tags
       </div>
 
       {/* Status */}
-      <div
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '8px',
-          fontSize: '14px',
-          color: '#6b7280'
-        }}
-      >
-        <ArrowUpRight size={16} /> {status}
+      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#6b7280' }}>
+        <span
+          style={{
+            display: 'inline-block',
+            width: '10px',
+            height: '10px',
+            borderRadius: '50%',
+            backgroundColor: getStatusColor(status)
+          }}
+        />
+        {status}
       </div>
     </div>
   );
