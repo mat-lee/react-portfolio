@@ -1,0 +1,9 @@
+[
+  {
+    "id": "tetris-rl",
+    "title": "Reinforcement Learning with TETRIS",
+    "summary": "1v1 AlphaZero-style Tetris engine.",
+    "github": "https://github.com/mat-lee/tetris-reinforcement-learning",
+    "labs": ["tetris-local-minima", "tetris-move-generation"]
+  }
+]

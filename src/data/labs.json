@@ -1,0 +1,20 @@
+[
+  {
+    "id": "tetris-move-generation",
+    "projectId": "tetris-rl",
+    "title": "Visualizing Move Generation in Tetris RL",
+    "date": "2025-11-03",
+    "summary": "An exploration of how the agent evaluates legal placements, with visual overlays of Q-values and visit counts.",
+    "cover": "/images/movegen_cover.png",
+    "gif": "/images/movegen_animation.gif"
+  },
+  {
+    "id": "tetris-local-minima",
+    "projectId": "tetris-rl",
+    "title": "Escaping Local Minima in Tetris RL",
+    "date": "2025-11-03",
+    "summary": "Why training plateaued and what diagnostics revealed.",
+    "cover": "/images/lab_entropy.png",
+    "gif": "/images/lab_entropy_anim.gif"
+  }
+]

@@ -1,7 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Menu, X, Github, Linkedin, Mail, ArrowUpRight, ExternalLink, ChevronUp } from "lucide-react";
+import { Routes, Route } from "react-router-dom";
+import LabPage from "./LabPage";
 
-export default function App() {
+function MainApp() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [active, setActive] = useState("home");
   const [showToTop, setShowToTop] = useState(false);
@@ -1054,5 +1056,14 @@ function ContactCard({ href, icon, text, external }) {
       {icon}
       <span style={{ fontSize: '14px' }}>{text}</span>
     </a>
+  );
+}
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<MainApp />} />
+      <Route path="/labs/:id" element={<LabPage />} />
+    </Routes>
   );
 }
