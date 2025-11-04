@@ -15,3 +15,53 @@ body {
   min-width: 320px;
   min-height: 100vh;
 }
+
+/* Fully-gray range slider (WebKit + Firefox) */
+.slider-gray {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  background: transparent;
+  accent-color: #9ca3af; /* fallback if the UA uses accent-color */
+  outline: none;
+}
+
+/* Track */
+.slider-gray::-webkit-slider-runnable-track {
+  height: 6px;
+  background: #e5e7eb;        /* gray-200 */
+  border-radius: 9999px;
+}
+.slider-gray::-moz-range-track {
+  height: 6px;
+  background: #e5e7eb;        /* gray-200 */
+  border-radius: 9999px;
+}
+
+/* Thumb */
+.slider-gray::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: #9ca3af;        /* gray-400 */
+  margin-top: -4px;            /* center on the 6px track */
+  cursor: pointer;
+}
+.slider-gray::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: none;
+  border-radius: 9999px;
+  background: #9ca3af;        /* gray-400 */
+  cursor: pointer;
+}
+
+/* Focus (optional, subtle ring) */
+.slider-gray:focus-visible::-webkit-slider-runnable-track {
+  box-shadow: 0 0 0 3px rgba(156, 163, 175, 0.25); /* gray-400/25 */
+}
+.slider-gray:focus-visible::-moz-range-track {
+  box-shadow: 0 0 0 3px rgba(156, 163, 175, 0.25);
+}

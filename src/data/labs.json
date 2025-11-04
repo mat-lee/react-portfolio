@@ -6,7 +6,8 @@
     "date": "2025-11-03",
     "summary": "An exploration of how the agent evaluates legal placements, with visual overlays of Q-values and visit counts.",
     "cover": "/images/movegen_cover.png",
-    "gif": "/images/movegen_animation.gif"
+    "gif": "/images/movegen_animation.gif",
+    "component": "TetrisMoveVisualizer"
   },
   {
     "id": "tetris-local-minima",
