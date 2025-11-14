@@ -6,60 +6,25 @@ const PIECES = ["I","O","T","S","Z","J","L"];
 export default function PiecePicker({ value = "T", onChange }) {
   const [open, setOpen] = useState(false);
 
-  const btnStyle = {
-    border: "1px solid #D1D5DB",
-    borderRadius: 6,
-    padding: "6px 10px",
-    background: "#fff",
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 8,
-    cursor: "pointer",
-  };
-
-  const menuStyle = {
-    position: "absolute",
-    zIndex: 9999,
-    marginTop: 4,
-    background: "#fff",
-    border: "1px solid #E5E7EB",
-    borderRadius: 8,
-    boxShadow:
-      "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)",
-    padding: 8,
-    display: "grid",
-    gridTemplateColumns: "repeat(7, 32px)",
-    gap: 8,
-  };
-
-  const itemStyle = {
-    width: 32,
-    height: 32,
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 6,
-    background: "transparent",
-    border: "none",
-    cursor: "pointer",
-  };
-
   return (
-    <div style={{ position: "relative", display: "inline-block" }}>
+    <div className="relative inline-block">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        style={btnStyle}
+        className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-gray-300 bg-white px-2.5 py-1.5 hover:bg-gray-50"
         aria-haspopup="listbox"
         aria-expanded={open}
         title={`Piece: ${value}`}
       >
         <TetrominoIcon piece={value} size={20} />
-        <span style={{ fontSize: 14, color: "#111827" }}>{value}</span>
+        <span className="text-sm text-gray-900">{value}</span>
       </button>
 
       {open && (
-        <div role="listbox" style={menuStyle}>
+        <div
+          role="listbox"
+          className="absolute z-[9999] mt-1 grid grid-cols-[repeat(7,32px)] gap-2 rounded-lg border border-gray-200 bg-white p-2 shadow-lg"
+        >
           {PIECES.map((p) => (
             <button
               key={p}
@@ -70,10 +35,8 @@ export default function PiecePicker({ value = "T", onChange }) {
                 onChange?.(p);
                 setOpen(false);
               }}
-              style={itemStyle}
+              className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-md border-none bg-transparent hover:bg-gray-100"
               title={p}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "#F3F4F6")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
               <TetrominoIcon piece={p} size={20} />
             </button>
