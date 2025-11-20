@@ -47,9 +47,10 @@ class MoveGenerator:
 
     def _add_state_to_queue(self, piece_location):
         """Adds a new state to the queue if it hasn't been checked, generating a 'reachable' frame."""
+        self.main_queue.append(piece_location)
+
+        # Generate frames
         if not self._already_checked(piece_location):
-            self.main_queue.append(piece_location)
-            self._mark_checked(piece_location)
             self.frames.append({
                 "kind": "reached",
                 "rotation": piece_location.rotation,
@@ -70,6 +71,12 @@ class MoveGenerator:
     def _brute_force_algorithm(self, check_rotations):
         while len(self.main_queue) > 0:
             piece_location = self.main_queue.popleft()
+
+            if self._already_checked(piece_location):
+                continue
+
+            self._mark_checked(piece_location)
+
             self.frames.append({
                 "kind": "popped",
                 "rotation": piece_location.rotation,
@@ -77,8 +84,7 @@ class MoveGenerator:
                 "y": piece_location.y
             })
 
-            piece_location_copy = piece_location.copy()
-            self.piece.location = piece_location_copy.copy()
+            self.piece.location = piece_location.copy()
 
             # Check if this is a placement location
             if not self.player.can_move(self.piece, y_offset=1):
@@ -95,7 +101,7 @@ class MoveGenerator:
 
             if check_rotations:
                 for i in range(1, 4):
-                    self.piece.location = piece_location_copy.copy() # Reset for each kick attempt
+                    self.piece.location = piece_location.copy() # Reset for each kick attempt
                     if self.player.try_wallkick(i):
                         new_location = self.piece.location.copy()
                         if new_location.y >= 0:
@@ -110,6 +116,13 @@ class MoveGenerator:
             for x in range(-2, self.width):
                 # Set piece at top
                 self.piece.location = PieceLocation(x=x, y=0, rotation=r)
+
+                self.frames.append({
+                    "kind": "reached",
+                    "rotation": self.piece.location.rotation,
+                    "x": self.piece.location.x,
+                    "y": self.piece.location.y
+                })
                 
                 # Check if this starting position is valid
                 if self.player.collision(self.piece.get_self_coords()):
@@ -123,8 +136,6 @@ class MoveGenerator:
 
                 # The final landing spot is a placement
                 final_location = self.piece.location.copy()
-                self.placeable_queue.append(final_location)
-
                 self.placeable_queue.append(final_location)
 
     def _faster_but_loss_algorithm(self, check_rotations):
@@ -187,7 +198,7 @@ class MoveGenerator:
             # We use _add_state_to_queue because it handles the visited check and
             # also generates the 'reached' frame for the landing spot.
             self._add_state_to_queue(self.piece.location.copy())
-            self.placeable_queue.append(self.piece.location.copy())
+            # self.placeable_queue.append(self.piece.location.copy())
 
         # --- Phase 4: Use brute force on the collected landing spots ---
         # self.main_queue now contains only the landing spots. The _brute_force_algorithm

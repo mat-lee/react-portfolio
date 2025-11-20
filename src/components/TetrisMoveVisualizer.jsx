@@ -381,17 +381,15 @@ function RotationGrid({ title, reached, placeable, popped, tspinType }) {
                   <div
                     className="absolute inset-[2px] rounded-[2px]"
                     style={{
-                      background:
-                        // A type of 4 specifically means T-spin mini + T-spin
-                        maskT === 4
-                          ? `linear-gradient(135deg, ${getTspinColor(2)} 50%, ${getTspinColor(1)} 50%)` // Pink and Purple
-                          : undefined,
+                      background: maskT === 4
+                        ? `linear-gradient(135deg, ${getTspinColor(2)} 50%, ${getTspinColor(1)} 50%)`
+                        : getTspinColor(maskT),
                       zIndex: 5,
                     }}
                   >
-                    {maskT === 1 ? <div className={`w-full h-full ${COLORS.tspinT1}`} /> : null}
-                    {maskT === 2 ? <div className={`w-full h-full ${COLORS.tspinT2}`} /> : null}
-                    {maskT === 3 ? <div className={`w-full h-full ${COLORS.tspinT3}`} /> : null}
+                    {/* The background is now handled by the style prop.
+                        This div is just for creating the element with the correct position and shape.
+                        The logic for type 4 (dual) is handled via the gradient background. */}
                   </div>
                 ) : null}
 
@@ -472,7 +470,10 @@ function makeNumGrid() {
 function getTspinColor(type) {
   if (type === 1) return "rgba(168,85,247,1)"; // T-Spin Mini -> purple-500
   if (type === 2) return "rgba(236,72,153,1)"; // T-Spin -> pink-500
-  return "rgba(14, 165, 233, 1)";              // Mini Spin -> sky-500
+  if (type === 3) return "rgba(14, 165, 233, 1)"; // Mini Spin -> sky-500
+  // For type 4, the gradient is constructed directly.
+  // For any other case, return undefined so no background is applied.
+  return undefined;
 }
 
 function patchCell(layers, rot, x, y, val) {
