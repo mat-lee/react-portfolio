@@ -72,7 +72,14 @@ class MoveGenerator:
         while len(self.main_queue) > 0:
             piece_location = self.main_queue.popleft()
 
+            self.piece.location = piece_location.copy()
+
             if self._already_checked(piece_location):
+                # If placeable and not already in placeable queue, add it
+                # Check if this is a placement location
+                if not self.player.can_move(self.piece, y_offset=1):
+                    if piece_location not in self.placeable_queue:
+                        self.placeable_queue.append(piece_location.copy())
                 continue
 
             self._mark_checked(piece_location)
@@ -83,8 +90,6 @@ class MoveGenerator:
                 "x": piece_location.x,
                 "y": piece_location.y
             })
-
-            self.piece.location = piece_location.copy()
 
             # Check if this is a placement location
             if not self.player.can_move(self.piece, y_offset=1):

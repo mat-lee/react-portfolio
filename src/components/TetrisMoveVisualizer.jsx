@@ -5,9 +5,14 @@ import PiecePicker from "./PiecePicker";
 const WIDTH = 10;
 const HEIGHT = 20;
 
+// The visualization grid needs to be wider to show piece movements that start
+// outside the main board boundaries (e.g., x = -1, -2).
+const VIZ_GRID_WIDTH = 12;
+const VIZ_GRID_X_OFFSET = 2; // Board's x=0 is at viz grid's x=2
+
 // Visual constants (editor + viz)
 const CELL_EDITOR = 22; // px
-const CELL_VIZ    = 18; // px
+const CELL_VIZ    = 16; // px
 
 // Light grid look
 const COLORS = {
@@ -41,7 +46,7 @@ export default function TetrisMoveVisualizer() {
     Array.from({ length: HEIGHT }, () => Array(WIDTH).fill(0))
   );
   const [piece, setPiece] = useState("T");
-  const [speedUI, setSpeedUI] = useState(50);
+  const [speedUI, setSpeedUI] = useState(70);
   const [ups, setUps] = useState(uiToUPS(20));
   const [algorithm, setAlgorithm] = useState("brute-force");
   const [accuracy, setAccuracy] = useState(null);
@@ -57,16 +62,16 @@ export default function TetrisMoveVisualizer() {
   const [frames, setFrames] = useState([]);
 
   const [reached, setReached] = useState([
-    makeBoolGrid(), makeBoolGrid(), makeBoolGrid(), makeBoolGrid(),
+    makeBoolGrid(VIZ_GRID_WIDTH), makeBoolGrid(VIZ_GRID_WIDTH), makeBoolGrid(VIZ_GRID_WIDTH), makeBoolGrid(VIZ_GRID_WIDTH),
   ]);
   const [placeable, setPlaceable] = useState([
-    makeBoolGrid(), makeBoolGrid(), makeBoolGrid(), makeBoolGrid(),
+    makeBoolGrid(VIZ_GRID_WIDTH), makeBoolGrid(VIZ_GRID_WIDTH), makeBoolGrid(VIZ_GRID_WIDTH), makeBoolGrid(VIZ_GRID_WIDTH),
   ]);
   const [popped, setPopped] = useState([
-    makeBoolGrid(), makeBoolGrid(), makeBoolGrid(), makeBoolGrid(),
+    makeBoolGrid(VIZ_GRID_WIDTH), makeBoolGrid(VIZ_GRID_WIDTH), makeBoolGrid(VIZ_GRID_WIDTH), makeBoolGrid(VIZ_GRID_WIDTH),
   ]);
   const [tspinCells, setTspinCells] = useState([
-    makeNumGrid(), makeNumGrid(), makeNumGrid(), makeNumGrid(),
+    makeNumGrid(VIZ_GRID_WIDTH), makeNumGrid(VIZ_GRID_WIDTH), makeNumGrid(VIZ_GRID_WIDTH), makeNumGrid(VIZ_GRID_WIDTH),
   ]);
 
   const isDraggingRef = useRef(false);
@@ -125,10 +130,10 @@ export default function TetrisMoveVisualizer() {
     setIsPlaying(false);
     setStep(0);
     accRef.current = 0;
-    setReached([makeBoolGrid(), makeBoolGrid(), makeBoolGrid(), makeBoolGrid()]);
-    setPlaceable([makeBoolGrid(), makeBoolGrid(), makeBoolGrid(), makeBoolGrid()]);
-    setPopped([makeBoolGrid(), makeBoolGrid(), makeBoolGrid(), makeBoolGrid()]);
-    setTspinCells([makeNumGrid(), makeNumGrid(), makeNumGrid(), makeNumGrid()]);
+    setReached([makeBoolGrid(VIZ_GRID_WIDTH), makeBoolGrid(VIZ_GRID_WIDTH), makeBoolGrid(VIZ_GRID_WIDTH), makeBoolGrid(VIZ_GRID_WIDTH)]);
+    setPlaceable([makeBoolGrid(VIZ_GRID_WIDTH), makeBoolGrid(VIZ_GRID_WIDTH), makeBoolGrid(VIZ_GRID_WIDTH), makeBoolGrid(VIZ_GRID_WIDTH)]);
+    setPopped([makeBoolGrid(VIZ_GRID_WIDTH), makeBoolGrid(VIZ_GRID_WIDTH), makeBoolGrid(VIZ_GRID_WIDTH), makeBoolGrid(VIZ_GRID_WIDTH)]);
+    setTspinCells([makeNumGrid(VIZ_GRID_WIDTH), makeNumGrid(VIZ_GRID_WIDTH), makeNumGrid(VIZ_GRID_WIDTH), makeNumGrid(VIZ_GRID_WIDTH)]);
     setAccuracy(null);
   }, []);
 
@@ -301,16 +306,17 @@ export default function TetrisMoveVisualizer() {
       </div>
 
       <div className="col-span-1 xl:col-span-2 space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {[0, 1, 2, 3].map((r) => (
-            <RotationGrid
-              key={r}
-              title={`Rotation ${r}`}
-              reached={reached[r]}
-              placeable={placeable[r]}
-              popped={popped[r]}
-              tspinType={tspinCells[r]}
-            />
+            <div key={r} className="min-w-0 w-full">
+              <RotationGrid
+                title={`Rotation ${r}`}
+                reached={reached[r]}
+                placeable={placeable[r]}
+                popped={popped[r]}
+                tspinType={tspinCells[r]}
+              />
+            </div>
           ))}
         </div>
 
@@ -347,34 +353,50 @@ function RotationGrid({ title, reached, placeable, popped, tspinType }) {
   const reachEdges = useMemo(() => computeEdges(reached), [reached]);
   const placeEdges = useMemo(() => computeEdges(placeable), [placeable]);
 
+  const containerRef = useRef(null);
+  const [cellSize, setCellSize] = useState(CELL_VIZ);
+
+  useEffect(() => {
+    const updateSize = () => {
+      if (containerRef.current) {
+        const containerWidth = containerRef.current.offsetWidth - 32; // subtract padding
+        const maxCellSize = Math.floor(containerWidth / VIZ_GRID_WIDTH);
+        setCellSize(Math.min(maxCellSize, CELL_VIZ));
+      }
+    };
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
+
   return (
     <div className={`p-3 rounded-2xl ${COLORS.panel}`}>
       <div className="flex items-center justify-between mb-2">
         <h4 className="text-gray-900 font-semibold text-sm">{title}</h4>
       </div>
 
-      <div className="inline-block p-2 rounded-lg bg-white border border-gray-200">
+      <div className="p-2 rounded-lg bg-white border border-gray-200 overflow-x-auto max-w-full">
         <div
-          className="grid w-fit rounded-md"
-          style={{ gridTemplateColumns: `repeat(${WIDTH}, ${CELL_VIZ}px)` }}
+          className="grid w-fit rounded-md mx-auto max-w-full"
+          style={{ gridTemplateColumns: `repeat(${VIZ_GRID_WIDTH}, ${CELL_VIZ}px)`, maxWidth: '100%' }}
         >
-          {Array.from({ length: HEIGHT * WIDTH }, (_, idx) => {
-            const x = idx % WIDTH;
-            const y = Math.floor(idx / WIDTH);
+          {Array.from({ length: HEIGHT * VIZ_GRID_WIDTH }, (_, idx) => {
+            const x = idx % VIZ_GRID_WIDTH;
+            const y = Math.floor(idx / VIZ_GRID_WIDTH);
             const maskT = tspinType[y][x];
             const isPopped = popped[y][x];
-
+            const isMainBoardCell = x >= 0 && x < VIZ_GRID_X_OFFSET + WIDTH;
             return (
               <div
                 key={idx}
                 className={`relative ${isPopped ? COLORS.cellBgPopped : COLORS.cellBgEmpty}`}
-                style={{ width: CELL_VIZ, height: CELL_VIZ }}
+                style={{ width: cellSize, height: cellSize }}
               >
-                {x > 0 && (
-                  <div className={`absolute left-0 top-0 bottom-0 w-px ${COLORS.gridLine}`} style={{ zIndex: 0 }} />
+                {x > 0 && ( // Vertical lines
+                  <div className={`absolute left-0 top-0 bottom-0 w-px ${(x >= 0 && x <= VIZ_GRID_X_OFFSET + WIDTH) ? COLORS.gridLine : 'bg-gray-100'}`} style={{ zIndex: 0 }} />
                 )}
-                {y > 0 && (
-                  <div className={`absolute left-0 right-0 top-0 h-px ${COLORS.gridLine}`} style={{ zIndex: 0 }} />
+                {y > 0 && ( // Horizontal lines
+                  <div className={`absolute left-0 right-0 top-0 h-px ${isMainBoardCell ? COLORS.gridLine : 'bg-gray-100'}`} style={{ zIndex: 0 }} />
                 )}
 
                 {maskT ? (
@@ -459,12 +481,12 @@ function AccuracyDisplay({ accuracy }) {
 }
 
 /* =================== Helpers ==================== */
-function makeBoolGrid() {
-  return Array.from({ length: HEIGHT }, () => Array(WIDTH).fill(false));
+function makeBoolGrid(width = WIDTH) {
+  return Array.from({ length: HEIGHT }, () => Array(width).fill(false));
 }
 
-function makeNumGrid() {
-  return Array.from({ length: HEIGHT }, () => Array(WIDTH).fill(0));
+function makeNumGrid(width = WIDTH) {
+  return Array.from({ length: HEIGHT }, () => Array(width).fill(0));
 }
 
 function getTspinColor(type) {
@@ -478,8 +500,9 @@ function getTspinColor(type) {
 
 function patchCell(layers, rot, x, y, val) {
   const copy = layers.map((g) => g.map((row) => row.slice()));
+  const vizX = x + VIZ_GRID_X_OFFSET;
   const grid = copy[rot];
-  if (grid && grid[y] && typeof grid[y][x] !== "undefined") grid[y][x] = val;
+  if (grid && grid[y] && typeof grid[y][vizX] !== "undefined") grid[y][vizX] = val;
   return copy;
 }
 
@@ -489,7 +512,7 @@ function applyMicroFrame(frame, setReached, setPlaceable, setTspinCells, setPopp
   else if (kind === "placeable") setPlaceable((layers) => patchCell(layers, r, x, y, true));
   else if (kind === "tspin") {
     setTspinCells((layers) => {
-      const currentType = layers[r][y][x];
+      const currentType = layers[r][y][x + VIZ_GRID_X_OFFSET];
       let newType = type;
 
       if (currentType) {
@@ -499,7 +522,6 @@ function applyMicroFrame(frame, setReached, setPlaceable, setTspinCells, setPopp
         }
         // Other combinations can be handled here if needed in the future.
       }
-
       return patchCell(layers, r, x, y, newType);
     });
   }

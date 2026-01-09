@@ -1,7 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Menu, X, Github, Linkedin, Mail, ArrowUpRight, ExternalLink, ChevronUp } from "lucide-react";
-import { Routes, Route } from "react-router-dom";
+import { Menu, X, Github, Linkedin, Mail, ArrowUpRight, ExternalLink, ChevronUp, FlaskConical } from "lucide-react";
+import { Routes, Route, Link, useNavigate } from "react-router-dom";
 import LabPage from "./LabPage";
+import projectsData from "./data/projects.json";
+import labsData from "./data/labs.json";
 
 function MainApp() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -700,6 +702,7 @@ function AboutSection() {
 
 // Projects Section Component  
 function ProjectsSection() {
+  const navigate = useNavigate();
   const projectsRef = useRef();
   const [isVisible, setIsVisible] = useState(false);
 
@@ -772,37 +775,23 @@ function ProjectsSection() {
             gridTemplateColumns: '1fr',
             gap: '24px'
           }}>
-            {/* Project 1 */}
-            <ProjectCard
-              title="Reinforcement Learning with TETRIS"
-              description="An implementation of reinforcement learning algorithms and AI to play 1-on-1 TETRIS. Built with Python and implemented with PyTorch and Keras for deep learning. Incorporates machine learning concepts from both Chess and Go to accelerate learning."
-              link="https://github.com/mat-lee/tetris-reinforcement-learning"
-              linkText="View"
-              tags={["Python", "PyTorch", "Keras", "RL", "MCTS"]}
-              status="Ongoing iterative improvements"
-            />
-
-            {/* Project 2 */}
-            <ProjectCard
-              title="Traffic Accident Severity Prediction"
-              description="A lightweight ML app that predicts traffic accident severity using weather, time, and location features; includes a fast user demo"
-              link="https://mat-lee-traffic-demo.streamlit.app/"
-              linkText="Demo"
-              github="https://github.com/mat-lee/traffic-demo"
-              tags={["Pandas", "Scikit-learn", "Streamlit", "Data Analysis"]}
-              status="Public interactive app"
-            />
-
-            {/* Project 3 */}
-            <ProjectCard
-              title="Advice Aggregator Website"
-              description="An ongoing web app that scrapes and clusters advice across multiple online sources. Uses NLP techniques to group similar insights and display them in a clean, searchable interface."
-              link="https://mat-lee.github.io/advice-website/"
-              linkText="Link"
-              github="https://github.com/mat-lee/advice-website"
-              tags={["Web scraping", "NLP", "Clustering", "Full-stack"]}
-              status="Ongoing project"
-            />
+            {projectsData.map(project => {
+              const projectLabs = labsData.filter(lab => lab.projectId === project.id);
+              return (
+                <ProjectCard
+                  key={project.id}
+                  title={project.title}
+                  description={project.summary}
+                  github={project.github}
+                  link={project.link}
+                  linkText={project.linkText || "View"}
+                  tags={project.tags || []}
+                  status={project.status || "Ongoing"}
+                  labs={projectLabs}
+                  onLabClick={(labId) => navigate(`/labs/${labId}`)}
+                />
+              );
+            })}
           </div>
         </div>
       </div>
@@ -810,7 +799,7 @@ function ProjectsSection() {
   );
 }
 
-function ProjectCard({ title, description, link, linkText = "Demo", github, tags = [], status }) {
+function ProjectCard({ title, description, link, linkText = "Demo", github, tags = [], status, labs = [], onLabClick }) {
   const linkBaseStyle = {
     display: 'inline-flex',
     alignItems: 'center',
@@ -912,18 +901,54 @@ function ProjectCard({ title, description, link, linkText = "Demo", github, tags
         ))}
       </div>
 
-      {/* Status */}
-      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#6b7280' }}>
-        <span
-          style={{
-            display: 'inline-block',
-            width: '10px',
-            height: '10px',
-            borderRadius: '50%',
-            backgroundColor: getStatusColor(status)
-          }}
-        />
-        {status}
+      {/* Labs and Status */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '16px' }}>
+        {labs.length > 0 && (
+          <div>
+            <h4 style={{ fontSize: '12px', fontWeight: 600, color: '#6b7280', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Lab Notes
+            </h4>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              {labs.map(lab => (
+                <button
+                  key={lab.id}
+                  onClick={() => onLabClick(lab.id)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '4px 10px',
+                    backgroundColor: 'white',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '9999px',
+                    fontSize: '12px',
+                    fontWeight: 500,
+                    color: '#374151',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#d1d5db'; e.currentTarget.style.backgroundColor = '#f9fafb'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.backgroundColor = 'white'; }}
+                >
+                  <FlaskConical size={12} />
+                  {lab.title}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#6b7280', flexShrink: 0, marginTop: labs.length > 0 ? '16px' : '0' }}>
+          <span
+            style={{
+              display: 'inline-block',
+              width: '10px',
+              height: '10px',
+              borderRadius: '50%',
+              backgroundColor: getStatusColor(status)
+            }}
+          />
+          {status}
+        </div>
       </div>
     </div>
   );
@@ -1062,7 +1087,7 @@ function ContactCard({ href, icon, text, external }) {
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<MainApp />} />
+      <Route path="/*" element={<MainApp />} />
       <Route path="/labs/:id" element={<LabPage />} />
     </Routes>
   );

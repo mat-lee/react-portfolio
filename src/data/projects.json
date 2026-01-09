@@ -5,5 +5,34 @@
     "summary": "1v1 AlphaZero-style Tetris engine.",
     "github": "https://github.com/mat-lee/tetris-reinforcement-learning",
     "labs": ["tetris-local-minima", "tetris-move-generation"]
+  },
+  {
+    "id": "market-simulator",
+    "title": "Market Simulator",
+    "summary": "A simulation environment for testing algorithmic trading strategies.",
+    "github": "https://github.com/mat-lee/market-simulator",
+    "labs": ["initial-design"]
+  },
+  {
+    "id": "traffic-prediction",
+    "title": "Traffic Accident Severity Prediction",
+    "summary": "A lightweight ML app that predicts traffic accident severity using weather, time, and location features; includes a fast user demo.",
+    "link": "https://mat-lee-traffic-demo.streamlit.app/",
+    "linkText": "Demo",
+    "github": "https://github.com/mat-lee/traffic-demo",
+    "tags": ["Pandas", "Scikit-learn", "Streamlit", "Data Analysis"],
+    "status": "Public interactive app",
+    "labs": []
+  },
+  {
+    "id": "advice-aggregator",
+    "title": "Advice Aggregator Website",
+    "summary": "An ongoing web app that scrapes and clusters advice across multiple online sources. Uses NLP techniques to group similar insights and display them in a clean, searchable interface.",
+    "link": "https://mat-lee.github.io/advice-website/",
+    "linkText": "Link",
+    "github": "https://github.com/mat-lee/advice-website",
+    "tags": ["Web scraping", "NLP", "Clustering", "Full-stack"],
+    "status": "Ongoing project",
+    "labs": []
   }
 ]
