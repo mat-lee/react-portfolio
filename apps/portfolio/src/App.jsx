@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Menu, X, Github, Linkedin, Mail, ArrowUpRight, ExternalLink, ChevronUp, FlaskConical } from "lucide-react";
-import { Routes, Route, Link, useNavigate } from "react-router-dom";
-import LabPage from "./LabPage";
+import { Menu, X, Github, Linkedin, Mail, ExternalLink, ChevronUp, FlaskConical } from "lucide-react";
+import { Routes, Route } from "react-router-dom";
 import projectsData from "./data/projects.json";
 import labsData from "./data/labs.json";
 
@@ -700,9 +699,8 @@ function AboutSection() {
   );
 }
 
-// Projects Section Component  
+// Projects Section Component
 function ProjectsSection() {
-  const navigate = useNavigate();
   const projectsRef = useRef();
   const [isVisible, setIsVisible] = useState(false);
 
@@ -788,7 +786,6 @@ function ProjectsSection() {
                   tags={project.tags || []}
                   status={project.status || "Ongoing"}
                   labs={projectLabs}
-                  onLabClick={(labId) => navigate(`/labs/${labId}`)}
                 />
               );
             })}
@@ -799,7 +796,7 @@ function ProjectsSection() {
   );
 }
 
-function ProjectCard({ title, description, link, linkText = "Demo", github, tags = [], status, labs = [], onLabClick }) {
+function ProjectCard({ title, description, link, linkText = "Demo", github, tags = [], status, labs = [] }) {
   const linkBaseStyle = {
     display: 'inline-flex',
     alignItems: 'center',
@@ -910,9 +907,11 @@ function ProjectCard({ title, description, link, linkText = "Demo", github, tags
             </h4>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
               {labs.map(lab => (
-                <button
+                <a
                   key={lab.id}
-                  onClick={() => onLabClick(lab.id)}
+                  href={lab.url || `https://labs.codebymatthewlee.com/${lab.id}`}
+                  target="_blank"
+                  rel="noreferrer"
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -925,6 +924,7 @@ function ProjectCard({ title, description, link, linkText = "Demo", github, tags
                     fontWeight: 500,
                     color: '#374151',
                     cursor: 'pointer',
+                    textDecoration: 'none',
                     transition: 'all 0.2s'
                   }}
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#d1d5db'; e.currentTarget.style.backgroundColor = '#f9fafb'; }}
@@ -932,7 +932,7 @@ function ProjectCard({ title, description, link, linkText = "Demo", github, tags
                 >
                   <FlaskConical size={12} />
                   {lab.title}
-                </button>
+                </a>
               ))}
             </div>
           </div>
@@ -1088,7 +1088,6 @@ export default function App() {
   return (
     <Routes>
       <Route path="/*" element={<MainApp />} />
-      <Route path="/labs/:id" element={<LabPage />} />
     </Routes>
   );
 }

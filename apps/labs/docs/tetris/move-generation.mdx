@@ -1,0 +1,28 @@
+---
+title: Visualizing Move Generation
+description: An interactive exploration of pathfinding algorithms for Tetris pieces
+sidebar_position: 1
+---
+
+import { TetrisMoveVisualizer } from '@portfolio/demos';
+
+# Visualizing Move Generation in Tetris
+
+When building a Tetris AI, one fundamental challenge is determining all the positions where a piece can legally be placed. This involves simulating all possible sequences of moves (left, right, rotate, soft drop) to find every reachable position.
+
+## Interactive Demo
+
+Draw on the board to create obstacles, select a piece, and watch the algorithm explore all reachable positions:
+
+<TetrisMoveVisualizer />
+
+## Algorithms
+
+### Brute Force
+Explores every possible state through BFS. Guarantees finding all reachable positions but can be slow.
+
+### Hard Drop Only
+Only considers positions reachable by hard drop from the spawn point. Much faster but misses tucked positions.
+
+### Faster But Loss
+A hybrid approach that trades some completeness for speed. Good for real-time applications.

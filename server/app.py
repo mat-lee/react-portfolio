@@ -1,10 +1,25 @@
 # FastAPI server that matches your Visualizer's expectations
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Dict, Any
 from movegen import generate_frames
 
 app = FastAPI()
+
+# CORS configuration for cross-origin requests
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",          # Vite dev server
+        "http://localhost:3000",          # Docusaurus dev server
+        "https://codebymatthewlee.com",   # Production portfolio
+        "https://labs.codebymatthewlee.com",  # Production labs
+    ],
+    allow_credentials=True,
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
+)
 
 class Payload(BaseModel):
     board: List[List[int]]  # HEIGHT x WIDTH, 0 empty / 1 filled

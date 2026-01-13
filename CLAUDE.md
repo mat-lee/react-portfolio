@@ -4,16 +4,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Personal portfolio website with React frontend and Python FastAPI backend. The backend handles computational tasks (currently Tetris move generation algorithms).
+Monorepo containing:
+- **Portfolio** (codebymatthewlee.com) - React/Vite personal website
+- **Labs** (labs.codebymatthewlee.com) - Docusaurus site for interactive explorations
+- **Demos** - Shared React components used by both sites
+- **API** (api.codebymatthewlee.com) - FastAPI backend for computational demos
 
 ## Commands
 
-### Frontend (Vite + React)
+### Full Stack Development
 ```bash
-npm install          # Install dependencies
-npm run dev          # Start dev server (proxies /api to localhost:8000)
-npm run build        # Production build
-npm run lint         # ESLint
+pnpm install                 # Install all workspace dependencies
+pnpm dev                     # Start all apps in parallel
+pnpm dev:portfolio           # Start only portfolio (localhost:5173)
+pnpm dev:labs                # Start only labs (localhost:3000)
 ```
 
 ### Backend (FastAPI)
@@ -21,27 +25,63 @@ npm run lint         # ESLint
 cd server
 source .venv/bin/activate
 pip install -r requirements.txt
-uvicorn app:app --reload    # Starts on localhost:8000
+uvicorn app:app --reload     # Starts on localhost:8000
 ```
 
-**Both servers must run simultaneously** - Vite proxies `/api/*` to the FastAPI backend.
+### Building
+```bash
+pnpm build                   # Build all apps
+pnpm build:portfolio         # Build only portfolio
+pnpm build:labs              # Build only labs
+```
 
-## Architecture
+## Project Structure
 
-### Frontend (`src/`)
-- **App.jsx**: Main portfolio page with navigation, projects, contact
-- **LabPage.jsx**: Dynamic renderer for interactive lab experiments
-  - Parses `<COMPONENT:Name/>` tags to embed React components
-  - Renders KaTeX math (inline `$...$` and block `$$...$$`)
-- **components/**: Reusable components (TetrisMoveVisualizer, PiecePicker, etc.)
-- **data/**: JSON files for projects and labs metadata
+```
+my-portfolio/
+├── apps/
+│   ├── portfolio/           # React/Vite main site
+│   │   └── src/
+│   │       ├── App.jsx      # Main portfolio page
+│   │       └── LabPage.jsx  # Legacy lab renderer (uses @portfolio/demos)
+│   └── labs/                # Docusaurus site
+│       └── docs/            # MDX lab pages
+├── packages/
+│   └── demos/               # Shared React components
+│       └── src/
+│           ├── index.js     # Barrel export
+│           └── TetrisMoveVisualizer/
+│               ├── TetrisMoveVisualizer.jsx
+│               ├── api.js   # Configurable API URL
+│               ├── PiecePicker.jsx
+│               └── TetrominoIcon.jsx
+└── server/                  # FastAPI backend
+    ├── app.py               # API with CORS for all domains
+    ├── movegen.py           # Move generation algorithms
+    └── tetris_logic.py      # Tetris game logic
+```
 
-### Backend (`server/`)
-- **app.py**: FastAPI app with `/api/generate` endpoint
-- **movegen.py**: Move generation algorithms (brute-force, harddrop, faster-but-loss)
-- **tetris_logic.py**: Core Tetris game logic (pieces, wallkicks, collision)
+## Adding a New Lab
 
-### Adding New Lab Components
-1. Create component in `src/components/`
-2. Register in `LAB_COMPONENTS` object in `LabPage.jsx`
-3. Add lab entry to `src/data/labs.json` with `<COMPONENT:ComponentName/>` in content
+1. **Create component** in `packages/demos/src/NewDemo/`
+2. **Export** from `packages/demos/src/index.js`:
+   ```js
+   export { default as NewDemo } from './NewDemo/index.jsx';
+   ```
+3. **Create MDX** in `apps/labs/docs/`:
+   ```mdx
+   import { NewDemo } from '@portfolio/demos';
+
+   # My Lab
+
+   <NewDemo />
+   ```
+
+## API Configuration
+
+The demos package reads API URL from:
+1. `VITE_API_URL` env var (Vite apps)
+2. Localhost fallback for development
+3. `https://api.codebymatthewlee.com` for production
+
+CORS is configured in `server/app.py` for all frontend domains.

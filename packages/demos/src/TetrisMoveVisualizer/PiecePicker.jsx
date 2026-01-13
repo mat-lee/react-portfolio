@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import TetrominoIcon from "./TetrominoIcon";
+import TetrominoIcon from "./TetrominoIcon.jsx";
 
 const PIECES = ["I","O","T","S","Z","J","L"];
 

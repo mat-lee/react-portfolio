@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import PiecePicker from "./PiecePicker";
+import PiecePicker from "./PiecePicker.jsx";
+import { generateMoves } from "./api.js";
 
 /* ===================== Config ===================== */
 const WIDTH = 10;
@@ -137,16 +138,10 @@ export default function TetrisMoveVisualizer() {
     setAccuracy(null);
   }, []);
 
-  const generateFrames = useCallback(async () => {
+  const generateFramesCallback = useCallback(async () => {
     try {
       onReset();
-      const res = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ board, piece, algorithm }),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
+      const data = await generateMoves(board, piece, algorithm);
       setFrames(data.frames);
       setAccuracy(data.accuracy);
     } catch (e) {
@@ -157,10 +152,10 @@ export default function TetrisMoveVisualizer() {
 
   const onPlay = useCallback(async () => {
     if (frames.length === 0) {
-      await generateFrames();
+      await generateFramesCallback();
     }
     setIsPlaying(true);
-  }, [frames.length, generateFrames]);
+  }, [frames.length, generateFramesCallback]);
 
   const onPause = useCallback(() => setIsPlaying(false), []);
 
