@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import "tailwindcss" preflight(none);
 
 /* Include the demos package in Tailwind's content scanning */
 @source "../../../../packages/demos/src/**/*.jsx";
