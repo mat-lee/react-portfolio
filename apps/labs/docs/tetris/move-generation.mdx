@@ -1,74 +1,90 @@
 ---
-title: Visualizing Move Generation in TETRIS
-description: An exploration of a move generation algorithm for modern TETRIS.
+title: Visualizing Move Generation in Tetris
+description: An exploration of a move generation algorithm for modern Tetris.
 sidebar_position: 1
 tags: [tetris, pathfinding, algorithms]
 ---
 
 import { TetrisMoveVisualizerIsolated } from '@portfolio/demos';
 
-Draw on the board to create obstacles, select a piece, and watch how different algorithms explore all reachable positions:
+export const TKI = [
+  [1, 0, 0, 1, 1, 0, 1, 1, 0, 0],
+  [1, 0, 0, 0, 1, 1, 1, 1, 1, 1],
+  [1, 1, 0, 1, 1, 1, 1, 1, 1, 1],
+];
 
-<TetrisMoveVisualizerIsolated />
+Draw on the board to place minos, select a piece, and explore how different algorithms discover all reachable positions
 
-The visualizer uses colors which are slightly different depending on which algorithm is used:
-- **Reached** (white border): queued to be explored later
-- **Popped** (grey fill): fully explored
-- **Placeable** (black border): a valid locking placement (T-spin color-coded when applicable)
+:::tip Try it out!
+Click cells to place obstacles, pick a piece, then hit **Play**.
+:::
+
+<TetrisMoveVisualizerIsolated initialRows={TKI} />
+
+- **Reached**: queued to be explored later
+- **Popped**: fully explored
+- **Placeable**: a valid locking placement (T-Spin color-coded when applicable)
+
+---
 
 ## Introduction
 
-Modern TETRIS (such as TETRIS 99 or tetr.io) has a surprising number of moving parts to model. One part of this is the rotation system aptly named **SRS** (Super Rotation System). Each piece is represented as a square 2d array of 1s and 0s, where the 1s represent minos. For example, the red Z piece is represented as:
+Modern Tetris (such as Tetris 99 or tetr.io) has a surprising number of moving parts to model. One part of this is the rotation system aptly named **SRS** (Super Rotation System). Each piece is represented as a square 2D array of `1`s and `0`s, where the `1`s represent minos. For example, the red Z piece is represented as:
 
-```txt
-[[1, 1, 0], 
- [0, 1, 1], 
+```txt title="Z piece matrix"
+[[1, 1, 0],
+ [0, 1, 1],
  [0, 0, 0]]
 ```
 
-A piece location is thus dependent on 3 things: an X coordinate and Y coordinate (which can vary based on implementation), and an orientation or rotation.
+A piece location is thus dependent on 3 things: an `x` coordinate, a `y` coordinate (which can vary based on implementation), and an orientation or `rotation`.
 
 ## Rotation and SRS
 
-Every piece has four possible orientations, each pointing in a different cardinal direction. There are buttons for rotating 90° clockwise, 90° counterclockwise, and 180°, which correspond to rotating the piece matrix appropriately. If minos exist in the spot where the piece attempts to rotate, that will lead to a collision. So the rules for SRS are as follows:
+Every piece has four possible orientations, each pointing in a different cardinal direction. There are buttons for rotating 90° clockwise, 90° counterclockwise, and 180°, which correspond to rotating the piece matrix appropriately. If minos exist in the spot where the piece attempts to rotate, that will lead to a **collision**. So the rules for SRS are as follows:
+
 1. Rotate the piece matrix
 2. Check for a collision
-3. If failed, move the piece coordinates by a specified distance according to a finite list of values, called kicks, and go back to step 2
+3. If failed, move the piece coordinates by a specified distance according to a finite list of values, called **kicks**, and go back to step 2
 4. If every kick leads to a collision, the piece cannot be rotated and nothing happens
 
 These are called **wallkicks**.
 
 ## T-Spins
 
-Another point of complexity are **T-Spins**. A T-Spin is defined as T piece placed such that:
-- It’s last movement input was a rotation
+Another point of complexity are **T-Spins**. A T-Spin is defined as a T piece placed such that:
+- Its last movement input was a rotation
 - The T-Spin default orientation piece matrix is:
-  ```txt
-  [[0, 1, 0], 
-  [1, 1, 1], 
-  [0, 0, 0]]
+  ```txt title="T piece matrix"
+  [[0, 1, 0],
+   [1, 1, 1],
+   [0, 0, 0]]
   ```
 - When placed, if 3 out of the 4 corners of the matrix are filled, then it is considered a T-spin.
 
-Additionally, a T-Spin may also be labeled as “mini”, making it a **T-spin-mini**. The rules for minis are:
-- If either of the 2 corners that the T is "pointing" towards is not filled, then it’s a mini.
+Additionally, a T-Spin may also be labeled as "mini", making it a **T-Spin Mini**. The rules for minis are:
+- If either of the 2 corners that the T is "pointing" towards is not filled, then it's a mini.
 - Exception: This does **not** apply if the last rotation that the T-piece performed was performed using the last possible wallkick.
 
-All the rules are a bit confusing. This means for T pieces, it’s possible that a T-spin-mini and a T-spin can be placed in the exact same spot. It also means that a T-spin-mini and a T without a spin can be placed in the exact same spot.
+:::note
+All the rules are a bit confusing. This means for T pieces, it's possible that a T-Spin Mini and a T-Spin can be placed in the exact same spot. It also means that a T-Spin Mini and a T without a spin can be placed in the exact same spot.
+:::
 
 So the final data class for a piece location looks like this:
 
-**Search state (reachability):**
-- `x`, `y`, `rotation`
+| Field | Purpose |
+|-------|---------|
+| `x`, `y`, `rotation` | Search state (reachability) |
+| `wasJustRotated` | Needed to classify T-Spin |
+| `usedLastKick` | Needed to classify Mini vs Full |
 
-**Extra info (to classify T-Spin vs Mini):**
-- `wasJustRotated`
-- `usedLastKick`
+---
 
 ## Algorithms
 
 ### Hard Drop Only
-**Idea:** A simple, very fast algorithm
+
+> A simple, very fast algorithm
 
 **Steps:**
 1. The starting position of the piece is rotated to all 4 rotations
@@ -76,57 +92,59 @@ So the final data class for a piece location looks like this:
 3. Each of those locations is hard-dropped
 
 **Notes:**
-- Misses all T-spins, locations that require a wallkick to reach, and locations where pieces would have to be moved down, then horizontally
+- Misses all T-Spins, locations that require a wallkick to reach, and locations where pieces would have to be moved down, then horizontally
 - This makes it an impractical choice for complex analysis, but is very fast and useful if you don't need spins
 
-### Brute force
+### Brute Force
 
-**Idea:** This algorithm checks every possible piece location for every possible movement. Two data structures are central: a set that tracks whether a piece location has been visited, and a queue.
+> Checks every possible piece location for every possible movement using BFS.
+
+Two data structures are central: a `visited` set that tracks whether a piece location has been visited, and a `queue`.
 
 **Steps:**
-1. The starting position of the piece is added to the queue
-2. Front of the queue is popped as piece_location
-3. If piece_location has already been visited, go back to 2
-4. Mark piece_location as visited
-5. Check is piece_location is where a piece would be placed, if so add it to a new list.
-6. piece_location is checked if the piece can be moved one mino left, right, or down, and also checked if it can be rotated 90, 180, or 270 degrees. For each movement, if there’s no collision, that new location is added to the back of the queue.
-7. Repeat steps 2-6 until the queue is empty, then return the list of placeable locations.
+1. The starting position of the piece is added to the `queue`
+2. Front of the `queue` is popped as `piece_location`
+3. If `piece_location` has already been visited, go back to step 2
+4. Mark `piece_location` as visited
+5. Check if `piece_location` is where a piece would be placed; if so, add it to a `placements` list
+6. `piece_location` is checked if the piece can be moved one mino left, right, or down, and also checked if it can be rotated 90°, 180°, or 270°. For each movement, if there's no collision, that new location is added to the back of the `queue`
+7. Repeat steps 2-6 until the `queue` is empty, then return the `placements` list
 
 **Notes:**
-- While 5 variables are required to describe a piece location, there’s no need to include the rotation booleans in the visited set as it leads to redundant analysis.
-- This algorithm will find every possible piece placement location. However, it’s slow because it computes rotations for every single location which is redundant.
+- While 5 variables are required to describe a piece location, there's no need to include the rotation booleans in the `visited` set as it leads to redundant analysis
+- This algorithm will find every possible piece placement location. However, it's slow because it computes rotations for every single location which is redundant
 
 ### Quick
-**Idea:** This algorithm tries to avoid the redundant rotation checks of the brute force algorithm by marking locations that aren’t touching any minos as visited. 
+
+> Avoids redundant rotation checks by pre-marking open airspace as visited.
 
 **Steps:**
 1. The starting position of the piece is rotated to all 4 rotations
 2. For each rotation, the piece is moved left and right for every possible column
 3. Each of those locations is moved downwards one mino at a time, marking each location as visited, until it cannot move downwards anymore
-4. The resulting position of each of those locations is added to a queue, and that queue and visited set is inputted into the brute force algorithm.
+4. The resulting position of each of those locations is added to a `queue`, and that `queue` and `visited` set is inputted into the brute force algorithm
 
-**Notes:**
-- This algorithm is substantially faster than the brute force algorithm, and has the capability of identifying most spins.
-- However, it will miss specific scenarios where pieces would have to be moved down partially, then horizontally.
+Substantially faster than the brute force algorithm, and has the capability of identifying most spins. However, it will miss specific scenarios where pieces would have to be moved down partially, then horizontally.
 
 ### Convolution
-**Idea:** This is a more complex algorithm, aimed at being able to find all possible piece locations without checking redundant rotations.
+
+> Finds all possible piece locations without checking redundant rotations.
 
 **Steps:**
-1. A convolution of the current piece is made with the grid. This gives a map of where the piece can fit in the board. This is done for all four rotations (sometimes rotations are redundant, i.e. a Z piece rotated 180 degrees has the same shape as a default Z piece, but is one lower, so convolution maps can be copied). This map will double as a way to both find new locations and mark locations as visited
-2. Locate the starting location in the corresponding convolutional map.
-3. Move left, right, and down in the map (like a graph) until you reach the edges, and mark those coordinates as visited.
-4. For each edge, if it’s placeable, add it to the placement queue
-5. Additionally for each edge, simulate all possible rotations from that location. If any of the resulting locations haven’t been checked in the convolution map, perform step 3 on those locations.
-6. Repeat steps 3-5 until finished, then return the list of placeable locations.
+1. A convolution of the current piece is made with the grid. This gives a map of where the piece can fit in the board. This is done for all four rotations (sometimes rotations are redundant, i.e. a Z piece rotated 180° has the same shape as a default Z piece, but is one mino lower, so convolution maps can be copied). This map will double as a way to both find new locations and mark locations as `visited`
+2. Locate the starting location in the corresponding convolutional map
+3. Move left, right, and down in the map (like a graph) until you reach the edges, and mark those coordinates as visited
+4. For each edge, if it's placeable, add it to the `placements` queue
+5. Additionally for each edge, simulate all possible rotations from that location. If any of the resulting locations haven't been checked in the convolution map, perform step 3 on those locations
+6. Repeat steps 3-5 until finished, then return the `placements` list
 
-**Notes:**
-- Will find every possible piece placement
-- Faster than brute-force but the trickiest to implement
+Will find every possible piece placement. Faster than brute force but the trickiest to implement.
+
+---
 
 :::info Terminology
-- **Minos**: the individual squares in a tetromino.
-- **Collision**: any overlap between minos and filled grid cells.
-- **Kick**: an (x, y) offset tried during rotation to avoid collisions.
-- **Placeable**: a state where the piece can lock / be placed.
+- **Minos** — the individual squares in a tetromino
+- **Collision** — any overlap between minos and filled grid cells
+- **Kick** — an `(x, y)` offset tried during rotation to avoid collisions
+- **Placeable** — a state where the piece can lock / be placed
 :::

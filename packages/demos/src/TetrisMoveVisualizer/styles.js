@@ -32,6 +32,7 @@ img, svg { display: block; max-width: 100%; }
 /* Grid columns */
 .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
 .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .grid-cols-\\[repeat\\(7\\,32px\\)\\] { grid-template-columns: repeat(7, 32px); }
 
 /* Column span */

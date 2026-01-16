@@ -42,17 +42,43 @@ function uiToUPS(v) {
 }
 
 /* =================== Component ==================== */
-export default function TetrisMoveVisualizer() {
-  const [board, setBoard] = useState(() =>
-    Array.from({ length: HEIGHT }, () => Array(WIDTH).fill(0))
-  );
+export default function TetrisMoveVisualizer({ initialRows = [] }) {
+  const [board, setBoard] = useState(() => {
+    // Start with empty board
+    const emptyBoard = Array.from({ length: HEIGHT }, () => Array(WIDTH).fill(0));
+
+    // If initialRows provided, place them at the bottom
+    if (initialRows.length > 0) {
+      const startRow = HEIGHT - initialRows.length;
+      for (let i = 0; i < initialRows.length; i++) {
+        emptyBoard[startRow + i] = [...initialRows[i]];
+      }
+    }
+
+    return emptyBoard;
+  });
   const [piece, setPiece] = useState("T");
   const [speedUI, setSpeedUI] = useState(70);
   const [ups, setUps] = useState(uiToUPS(20));
   const [algorithm, setAlgorithm] = useState("brute-force");
   const [accuracy, setAccuracy] = useState(null);
+  const [stats, setStats] = useState(null);
 
-  const ALGORITHMS = ["brute-force", "harddrop", "faster-but-loss"];
+  const ALGORITHMS = ["brute-force", "harddrop", "faster-but-loss", "convolution"];
+
+  // Compute stats from frames
+  const computeStats = (frames) => {
+    const counts = { reached: 0, popped: 0, placeable: 0, tspin: 0 };
+    for (const frame of frames) {
+      if (counts[frame.kind] !== undefined) {
+        counts[frame.kind]++;
+      }
+    }
+    return {
+      ...counts,
+      total: frames.length,
+    };
+  };
 
   useEffect(() => {
     setUps(uiToUPS(speedUI));
@@ -136,6 +162,7 @@ export default function TetrisMoveVisualizer() {
     setPopped([makeBoolGrid(VIZ_GRID_WIDTH), makeBoolGrid(VIZ_GRID_WIDTH), makeBoolGrid(VIZ_GRID_WIDTH), makeBoolGrid(VIZ_GRID_WIDTH)]);
     setTspinCells([makeNumGrid(VIZ_GRID_WIDTH), makeNumGrid(VIZ_GRID_WIDTH), makeNumGrid(VIZ_GRID_WIDTH), makeNumGrid(VIZ_GRID_WIDTH)]);
     setAccuracy(null);
+    setStats(null);
   }, []);
 
   const generateFramesCallback = useCallback(async () => {
@@ -144,6 +171,10 @@ export default function TetrisMoveVisualizer() {
       const data = await generateMoves(board, piece, algorithm);
       setFrames(data.frames);
       setAccuracy(data.accuracy);
+      setStats({
+        ...computeStats(data.frames),
+        collisionChecks: data.collisionChecks,
+      });
     } catch (e) {
       alert(`Failed to generate frames: ${e.message}`);
       setIsPlaying(false);
@@ -321,6 +352,12 @@ export default function TetrisMoveVisualizer() {
           </div>
         )}
 
+        {stats && (
+          <div className={`p-3 rounded-2xl ${COLORS.panel}`}>
+            <StatsDisplay stats={stats} />
+          </div>
+        )}
+
         <div className={`p-3 rounded-2xl ${COLORS.panel}`}>
           <h3 className="font-semibold mb-2 text-gray-900">Legend</h3>
           <div className="flex flex-wrap items-center gap-4 text-sm">
@@ -470,6 +507,18 @@ function AccuracyDisplay({ accuracy }) {
           <p className="text-gray-600">Spins Found</p>
           <p className="text-lg font-semibold text-gray-900">{spins.found} / {spins.total} ({spinsPercent}%)</p>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function StatsDisplay({ stats }) {
+  return (
+    <div>
+      <h3 className="font-semibold mb-2 text-gray-900">Performance</h3>
+      <div className="text-sm">
+        <p className="text-gray-600">Collision Checks</p>
+        <p className="text-lg font-semibold text-gray-900">{(stats.collisionChecks ?? 0).toLocaleString()}</p>
       </div>
     </div>
   );

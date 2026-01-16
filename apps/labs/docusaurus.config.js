@@ -7,8 +7,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'Lab Notes',
-  tagline: 'Interactive explorations by Matthew Lee',
+  title: 'Labs',
+  tagline: 'Explorations and visualizations of algorithms, systems, and ideas',
   favicon: 'img/favicon.ico',
 
   future: {
@@ -71,7 +71,7 @@ const config = {
         respectPrefersColorScheme: true,
       },
       navbar: {
-        title: 'Lab Notes',
+        title: 'Labs',
         items: [
           {
             href: 'https://codebymatthewlee.com',

@@ -13,10 +13,10 @@ import ShadowWrapper from '../ShadowWrapper.jsx';
 import TetrisMoveVisualizer from './TetrisMoveVisualizer.jsx';
 import { componentCSS } from './styles.js';
 
-export default function TetrisMoveVisualizerIsolated() {
+export default function TetrisMoveVisualizerIsolated({ initialRows }) {
   return (
     <ShadowWrapper css={componentCSS}>
-      <TetrisMoveVisualizer />
+      <TetrisMoveVisualizer initialRows={initialRows} />
     </ShadowWrapper>
   );
 }

@@ -33,3 +33,21 @@
   --ifm-color-primary-lightest: #4fddbf;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
+
+/* Project dropdown styling */
+.project-dropdown summary {
+  cursor: pointer;
+}
+
+/* Larger lab links */
+.lab-list {
+  list-style: none;
+  padding-left: 0;
+}
+.lab-list li {
+  font-size: 1.25rem;
+  margin: 0.75rem 0;
+}
+.lab-list a {
+  font-weight: 500;
+}

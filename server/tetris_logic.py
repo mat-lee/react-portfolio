@@ -171,8 +171,10 @@ class Player:
         self.piece = piece
         self.stats = Stats(ruleset)
         self.ruleset = ruleset
+        self.collision_checks = 0
 
     def collision(self, coords):
+        self.collision_checks += 1
         for col, row in coords:
             if not (0 <= row < self.board.height and 0 <= col < self.board.width):
                 return True
