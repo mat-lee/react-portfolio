@@ -280,9 +280,23 @@ class MoveGenerator:
         rotations_to_try = [1, 2, 3] if check_rotations else []
 
         while exploration_queue:
-            start_x, start_y, rot, _, _ = exploration_queue.popleft()
+            start_x, start_y, rot, rot_just_occurred, used_last_kick = exploration_queue.popleft()
 
-            # Skip if already visited
+            # If arrived via kick and immediately stuck, record kick-flagged placement
+            # before the visited check — flood-fill may have already visited this position
+            # via sliding, but we still need the kick-flagged version for T-spin detection.
+            if rot_just_occurred:
+                map_y_below = start_y + y_off + 1
+                stuck = (map_y_below >= validity_maps.shape[1] or
+                         not validity_maps[rot, map_y_below, start_x + x_off])
+                if stuck:
+                    self.placeable_queue.append(PieceLocation(
+                        x=start_x, y=start_y, rotation=rot,
+                        rotation_just_occurred=True,
+                        rotation_just_occurred_and_used_last_tspin_kick=used_last_kick
+                    ))
+
+            # Skip flood-fill if already visited
             if visited[rot, start_y + y_off, start_x + x_off]:
                 continue
 
@@ -292,20 +306,14 @@ class MoveGenerator:
                 validity_maps, visited, rot, start_x, start_y, x_off, y_off
             )
 
-            # Step 5: Try wallkicks at each edge
             for edge_x, edge_y, is_placeable in edges:
-                # Add placeable positions to the queue
                 if is_placeable:
-                    # For T-spins, we need to track how we got here
-                    # Since flood-fill doesn't rotate, rotation_just_occurred = False
-                    # unless we entered this region via a kick
                     self.placeable_queue.append(PieceLocation(
                         x=edge_x, y=edge_y, rotation=rot,
                         rotation_just_occurred=False,
                         rotation_just_occurred_and_used_last_tspin_kick=False
                     ))
 
-                # Try rotations at edges
                 for kick_dir in rotations_to_try:
                     new_rot = (rot + kick_dir) % 4
                     kicks_to_try = kick_table[rot].get(new_rot, [])
@@ -314,30 +322,38 @@ class MoveGenerator:
                         new_x = edge_x + kick_x
                         new_y = edge_y - kick_y  # Kick table Y is inverted
 
-                        # Check if new position is valid and unvisited
                         map_x = new_x + x_off
                         map_y = new_y + y_off
 
                         if (0 <= map_x < validity_maps.shape[2] and
                             0 <= map_y < validity_maps.shape[1] and
-                            validity_maps[new_rot, map_y, map_x] and
-                            not visited[new_rot, map_y, map_x]):
+                            validity_maps[new_rot, map_y, map_x]):
 
-                            # Track T-spin flags
-                            used_last_kick = (
+                            new_used_last_kick = (
                                 self.piece.type == "T" and
                                 kick_dir != 2 and
                                 kick_idx == len(kicks_to_try) - 1
                             )
 
-                            exploration_queue.append((
-                                new_x, new_y, new_rot, True, used_last_kick
-                            ))
-                            break  # First successful kick wins
+                            if new_y < 0:
+                                break
 
-        # Now handle T-spin detection for placements that came from kicks
-        # We need to re-process placeable_queue to find kick-based placements
-        self._process_kick_placements(validity_maps, visited, x_off, y_off, kick_table, rotations_to_try)
+                            if not visited[new_rot, map_y, map_x]:
+                                exploration_queue.append((
+                                    new_x, new_y, new_rot, True, new_used_last_kick
+                                ))
+                            else:
+                                # Already visited via sliding; still record kick-flagged
+                                # placement if stuck (for T-spin detection).
+                                map_y_below = map_y + 1
+                                if (map_y_below >= validity_maps.shape[1] or
+                                        not validity_maps[new_rot, map_y_below, map_x]):
+                                    self.placeable_queue.append(PieceLocation(
+                                        x=new_x, y=new_y, rotation=new_rot,
+                                        rotation_just_occurred=True,
+                                        rotation_just_occurred_and_used_last_tspin_kick=new_used_last_kick
+                                    ))
+                            break  # First successful kick wins
 
     def _flood_fill_rotation(self, validity_maps, visited, rot, start_x, start_y, x_off, y_off):
         """
@@ -402,56 +418,6 @@ class MoveGenerator:
                 edges.append((x, y, is_placeable))
 
         return edges
-
-    def _process_kick_placements(self, validity_maps, visited, x_off, y_off, kick_table, rotations_to_try):
-        """
-        For each existing placement, check if it could also be reached via kick.
-        If so, add a T-spin version (with rotation_just_occurred=True).
-        """
-        new_placements = []
-
-        # Check each existing placement for possible kick paths
-        for placement in self.placeable_queue:
-            x, y, rot = placement.x, placement.y, placement.rotation
-
-            # Skip if already has rotation flag (already a T-spin version)
-            if placement.rotation_just_occurred:
-                continue
-
-            # Check if this position could have been reached via kick
-            for kick_dir in rotations_to_try:
-                from_rot = (rot - kick_dir) % 4
-                kicks = kick_table[from_rot].get(rot, [])
-
-                for kick_idx, (kick_x, kick_y) in enumerate(kicks):
-                    from_x = x - kick_x
-                    from_y = y + kick_y  # Invert back
-                    from_map_x = from_x + x_off
-                    from_map_y = from_y + y_off
-
-                    # Check if we visited the source position
-                    if (0 <= from_map_x < validity_maps.shape[2] and
-                        0 <= from_map_y < validity_maps.shape[1] and
-                        visited[from_rot, from_map_y, from_map_x]):
-
-                        # This placement could be reached via kick - add T-spin version
-                        used_last_kick = (
-                            self.piece.type == "T" and
-                            kick_dir != 2 and
-                            kick_idx == len(kicks) - 1
-                        )
-
-                        new_placements.append(PieceLocation(
-                            x=x, y=y, rotation=rot,
-                            rotation_just_occurred=True,
-                            rotation_just_occurred_and_used_last_tspin_kick=used_last_kick
-                        ))
-                        break  # Found one kick path, that's enough
-                else:
-                    continue
-                break  # Found one kick path, move to next placement
-
-        self.placeable_queue.extend(new_placements)
 
     def _process_placements(self):
         # Deduplicate by (x, y, rotation), keeping T-spin version if exists

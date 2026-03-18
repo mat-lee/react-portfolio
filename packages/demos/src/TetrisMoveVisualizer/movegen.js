@@ -268,7 +268,18 @@ class MoveGenerator {
     const rotationsToTry = checkRotations ? [1, 2, 3] : [];
 
     while (explorationQueue.length > 0) {
-      const [startX, startY, rot] = explorationQueue.shift();
+      const [startX, startY, rot, rotJustOccurred, usedLastKick] = explorationQueue.shift();
+
+      // If arrived via kick and immediately stuck, record kick-flagged placement
+      // before the visited check — flood-fill may have already visited this position
+      // via sliding, but we still need the kick-flagged version for T-spin detection.
+      if (rotJustOccurred) {
+        const mapYBelow = startY + yOff + 1;
+        const stuck = mapYBelow >= mapHeight || !validityMaps[rot][mapYBelow][startX + xOff];
+        if (stuck) {
+          this.placeableQueue.push(makePieceLocation(startX, startY, rot, true, usedLastKick));
+        }
+      }
 
       if (visited[rot][startY + yOff][startX + xOff]) continue;
 
@@ -293,23 +304,32 @@ class MoveGenerator {
             if (
               mapX >= 0 && mapX < mapWidth &&
               mapY >= 0 && mapY < mapHeight &&
-              validityMaps[newRot][mapY][mapX] &&
-              !visited[newRot][mapY][mapX]
+              validityMaps[newRot][mapY][mapX]
             ) {
-              const usedLastKick = (
+              const newUsedLastKick = (
                 this.piece.type === 'T' &&
                 kickDir !== 2 &&
                 kickIdx === kicksToTry.length - 1
               );
-              explorationQueue.push([newX, newY, newRot, true, usedLastKick]);
+
+              if (newY < 0) break;
+
+              if (!visited[newRot][mapY][mapX]) {
+                explorationQueue.push([newX, newY, newRot, true, newUsedLastKick]);
+              } else {
+                // Already visited via sliding; still record kick-flagged placement
+                // if stuck (for T-spin detection).
+                const mapYBelow = mapY + 1;
+                if (mapYBelow >= mapHeight || !validityMaps[newRot][mapYBelow][mapX]) {
+                  this.placeableQueue.push(makePieceLocation(newX, newY, newRot, true, newUsedLastKick));
+                }
+              }
               break;
             }
           }
         }
       }
     }
-
-    this._processKickPlacements(validityMaps, visited, xOff, yOff, kickTable, rotationsToTry);
   }
 
   _floodFillRotation(validityMaps, visited, rot, startX, startY, xOff, yOff) {
@@ -356,50 +376,6 @@ class MoveGenerator {
     }
 
     return edges;
-  }
-
-  _processKickPlacements(validityMaps, visited, xOff, yOff, kickTable, rotationsToTry) {
-    const mapHeight = validityMaps[0].length;
-    const mapWidth = validityMaps[0][0].length;
-    const newPlacements = [];
-
-    for (const placement of this.placeableQueue) {
-      const { x, y, rotation: rot } = placement;
-
-      if (placement.rotationJustOccurred) continue;
-
-      let found = false;
-      for (const kickDir of rotationsToTry) {
-        if (found) break;
-        const fromRot = ((rot - kickDir) % 4 + 4) % 4;
-        const kicks = (kickTable[fromRot] && kickTable[fromRot][rot]) || [];
-
-        for (let kickIdx = 0; kickIdx < kicks.length; kickIdx++) {
-          const [kickX, kickY] = kicks[kickIdx];
-          const fromX = x - kickX;
-          const fromY = y + kickY;
-          const fromMapX = fromX + xOff;
-          const fromMapY = fromY + yOff;
-
-          if (
-            fromMapX >= 0 && fromMapX < mapWidth &&
-            fromMapY >= 0 && fromMapY < mapHeight &&
-            visited[fromRot][fromMapY][fromMapX]
-          ) {
-            const usedLastKick = (
-              this.piece.type === 'T' &&
-              kickDir !== 2 &&
-              kickIdx === kicks.length - 1
-            );
-            newPlacements.push(makePieceLocation(x, y, rot, true, usedLastKick));
-            found = true;
-            break;
-          }
-        }
-      }
-    }
-
-    this.placeableQueue.push(...newPlacements);
   }
 
   _processPlacements() {
