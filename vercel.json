@@ -1,5 +1,5 @@
 {
-  "buildCommand": "pnpm build:portfolio",
+  "buildCommand": "pnpm --filter @portfolio/app build",
   "outputDirectory": "apps/portfolio/dist",
   "installCommand": "pnpm install"
 }
