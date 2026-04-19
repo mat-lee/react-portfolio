@@ -1,5 +1,0 @@
-{
-  "buildCommand": "pnpm build:portfolio",
-  "outputDirectory": "apps/portfolio/dist",
-  "installCommand": "pnpm install"
-}
