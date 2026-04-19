@@ -1,0 +1,5 @@
+{
+  "buildCommand": "cd ../.. && pnpm --filter @portfolio/labs build",
+  "outputDirectory": "build",
+  "installCommand": "cd ../.. && pnpm install"
+}
