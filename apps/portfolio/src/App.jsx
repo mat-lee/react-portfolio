@@ -909,7 +909,7 @@ function ProjectCard({ title, description, link, linkText = "Demo", github, tags
               {labs.map(lab => (
                 <a
                   key={lab.id}
-                  href={lab.url || `https://labs.codebymatthewlee.com/${lab.id}`}
+                  href={lab.url || `https://react-portfolio-labs.vercel.app/${lab.id}`}
                   target="_blank"
                   rel="noreferrer"
                   style={{
