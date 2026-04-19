@@ -16,6 +16,7 @@ const sidebars = {
       },
       items: [
         'tetris/move-generation',
+        'tetris/local-minima',
       ],
     },
     // Add more project categories here as you create them
