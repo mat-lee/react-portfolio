@@ -74,7 +74,7 @@ const config = {
         title: 'Labs',
         items: [
           {
-            href: 'https://codebymatthewlee.com',
+            href: 'https://www.codebymatthewlee.com',
             label: 'Portfolio',
             position: 'right',
           },

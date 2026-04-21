@@ -12,12 +12,16 @@ two-player Tetris. After a while, however, progress stagnated. I used some stati
 
 ![Game replay](/img/game_replay_slow.gif)
 
+*A self-play game of my algorithm. Every game looks similar to this.*
+
 Visually, the problem is quite obvious. The agent converged on one style: stack aggressively, send garbage, repeat. 
-This post is my attempt to figure out why it converged on this specific strategy.
+This post is my attempt to uncover why it converged on this specific strategy.
 
 ---
 
-## 1. Is exploration the problem?
+## Chapter 1.
+
+### 1. Is exploration the problem?
 
 AlphaZero uses **Dirichlet noise** to force the search to consider moves it might
 otherwise ignore. A parameter α controls how aggressive that noise is — too small
@@ -34,23 +38,23 @@ move.
 The three panels tell the same story from different angles. At my production
 setting of α = 0.05 (marked with a red dashed line), the noise is at a solid level of increasing search diversity without overly changing chosen moves. The graphs also show that α = 0.001 barely affects the chosen move, while α > 0.3 makes the search chaotic.
 
-These show that exploration is working as intended. I changed α: 0.05 -> 0.1 so as to increase the search diversity. However, this is not the cause of the local minima.
+These show that exploration is working as intended. I changed α: 0.05 -> 0.1 so as to increase the search diversity. However, these graphs are evidence that is this is not the cause of the local minima.
 
 ---
 
-## 2. What is MCTS actually doing?
+### 2. What is MCTS actually doing?
 
-Given that the dirichlet alpha was fine, my next focus was the Monte Carlo Tree Search. Across 5 games I collected
-nine various metrics.
+Given that the dirichlet alpha was fine, my next focus was the Monte Carlo Tree Search, the tree search algorithm which uses the neural network's policy and value outputs to guide tree expansion to simulate game playouts. Across 5 games I collected
+nine relevant metrics:
 
 ![MCTS Analysis, 160 Iterations](/img/mcts_analysis_160.png)
 
-**Effective Branching %** (mean 52%) represents the number of nodes looked at from the root node. Notably, the
+**Effective Branching %** (mean 52%) represents the percentage of child nodes of root node that were looked at. Notably, the
 distribution is bimodal. Most positions either have visits spread across nearly
 every legal move, or almost entirely collapsed onto one. There's not much in
 between.
 
-**Visit Concentration, Top-1** (mean 59.7%) confirms the collapse side of that
+**Visit Concentration (Top-1)** shows the percentage of playouts given to the highest looked at node. (mean 59.7%) This confirms the collapse side of that
 picture. On average, one move gets 60% of the search budget — and many positions
 have all 160 playouts going to a single move. For context, the green dotted line
 shows what uniform allocation would look like (~2%). The agent is nowhere near
@@ -60,13 +64,15 @@ that.
 output) averages 1.61. **Visit entropy** (post-search) is 1.48. The search is
 making the distribution *narrower*, as expected.
 
+**Policy-Visit Rank Corr** (mean 0.68) measures the Spearman rank correlation between the policy prior and the final visit distribution. A value of 1.0 would mean the search spent playouts in exactly the order the network predicted. At 0.68, the search mostly follows the policy's ranking — but diverges meaningfully in a number of positions, consistent with the 23% policy surprise rate.
+
 **Value panels** show that the average value spread across visited moves is
 **0.06** on a [0,1] scale, and the average gap between the top two moves is only **0.08**, corresponding to 6 percentage points and 8 percentage points respectively.
 
 **Policy surprise rate** (23% overall, rising from 18% early game to 29% late)
 shows that search is changing the decision about 1 in 4 times.
 
-### Is the value head broken?
+#### Is the value head broken?
 
 ![Value Reliability Diagram](/img/value_reliability.png)
 
@@ -76,12 +82,11 @@ calibration. The agent tracks the diagonal reasonably well.
 
 However, the graph shows that the majority of positions are being evaluated as near coin-flips. The **value head is uncertain**, meaning the tree search has a more difficult time discerning which lines are actually promising beyond the policy prior. This could lead to a cycle where the agent is dominated by the policy during self-play games, leading to narrow training data, confining the network to that style. This is a potential cause of the local minima.
 
-### Does more compute help?
+#### Does more compute help?
+
+Running the same analysis at 800 iterations (5× the default) to see what difference more compute makes.
 
 ![MCTS Analysis, 800 Iterations](/img/mcts_analysis_800.png)
-
-I ran the same analysis at 800 iterations (5× the default) to see if more compute
-could rescue the search.
 
 | Metric | 160 iter | 800 iter |
 |---|---:|---:|
@@ -97,17 +102,21 @@ ahead first, which is why concentration increases. Policy surprise
 increases as expected, which means more iterations genuinely push the search to deviate from the
 prior more often (especially late game, where it jumps to 42%).
 
-> More compute helps around the margins. It doesn't fix a weak value signal.
+More compute here would help, but it doesn't look like it will solve the problem.
 
 ---
 
-## 3. Is the training configuration making it worse?
+### 3. Is the training configuration making it worse?
 
 My agent uses a self-learning idea from KataGo — **Forced Playouts and Policy Target Pruning:** Children of the root node are forcibly visited based on the policy and total playouts. Also, to prevent training from being influenced by bad "forced" moves, the algorithm prunes nodes that would not normally have been chosen.
 
 The CForcedPlayout parameter determines how strong this is; a higher value means more forced playouts and more pruning. My algorithm uses a default value of 1.
 
-Additionally, some features are turned on or off depending on whether the agent's mode is training or evaluation. The **evaluation mode** doesn't use: forced playouts and policy target pruning, dirichlet alpha, temperature, and randomized playouts
+Additionally, some features are turned on or off depending on whether the agent's mode is training or evaluation. The **evaluation mode** doesn't use the following:
+- Forced playouts and policy target pruning
+- Dirichlet alpha
+- Temperature (which adds randomness to move selection, affecting the behavioral policy)
+- Randomized playouts (which randomizes the number of MCTS)
 
 To examine these, I compared these four configurations on identical positions:
  - **Eval:** standard evaluation mode
@@ -117,25 +126,23 @@ To examine these, I compared these four configurations on identical positions:
 
 ![Config Comparison Diagram](/img/config_comparison.png)
 
-A few things stand out.
-
 Comparing Train vs Train-Forced makes it clear: the **policy target pruning** that runs after move selection,
 deliberately zeroing out low-value visits before they become training labels is what's reducing the branching %.
-That is by design — it sharpens the policy target. **More aggressive pruning (CForced=3) heightens the disparity.**
+That is what policy target pruning is meant to do; it sharpens the policy target. More aggressive pruning (CForced=3) heightens the disparity.
 
 Because the value head is already uncertain and possibly be causing the local minima, these findings support that turning off Forced Playouts will help the agent distinguish between different states.
 
 ---
 
-## 4. Has the network actually been learning?
+### 4. Has the network actually been learning?
 
-The search diagnostics show that something is wrong, but they're taken from a single snapshot. The training loss curves tell you how long it's been wrong.
+The search diagnostics show that something is wrong, but they're taken from a single snapshot. The training loss curves provide more information about how well the algorithm is performing.
 
 ![Training Loss Curves](/img/training_loss_curves.png)
 
 Both heads have flatlined. Value MSE has hovered between 0.18 and 0.20 for the last 50 datasets, with a brief dip to ~0.18 around dataset that didn't hold. Policy cross-entropy shows the same pattern — the 5-set smoothed average sits around 1.56–1.64.
 
-The network hasn't meaningfully improved in ~50 datasets. The losses aren't spiking — they're just not moving
+The loss curves do not directly measure playing strength; they measure how well the network fits the self-play targets it is given. So the flat policy and value losses do not prove the model has stopped getting stronger. What they do show is that, for roughly the last 50 datasets, the network is fitting its targets to about the same degree as before.
 
 There's a second chart that adds a wrinkle to that picture.
 
@@ -143,29 +150,33 @@ There's a second chart that adds a wrinkle to that picture.
 
 This tracks the mean Shannon entropy of the policy targets generated during self-play — a direct measure of how concentrated the search's move distributions are becoming. From datasets 0–80 the trend is flat around 0.91. After that it drops steadily to ~0.87 by dataset 100.
 
-The loss curves being flat means the network has stopped improving. This chart means the *training data itself* is getting narrower. The search is producing increasingly peaked policy targets, which trains the network to be more decisive, which causes the search to collapse further onto its top move. The losses aren't rising because the network is successfully fitting its targets — the targets are just getting worse.
+This means the search is producing increasingly concentrated move distributions. Combined with the earlier search diagnostics, this suggests that the self-play targets may be getting narrower without becoming more informative.
 
 ---
 
-## 5. Does more compute actually fix this?
-
-Section 2.3 showed that 800 iterations didn't meaningfully improve the value signal. But that comparison missed something: how **playout cap randomization** interacts with MAX_ITER.
-
-Only 25% of moves receive the full search budget and get saved to training data. The other 75% are played with a reduced budget and discarded. With my config (mult=5, chance=0.25):
-
-| MAX_ITER | Short (75%, unsaved) | Long (25%, saved) |
-|---|---:|---:|
-| 160 | 80 | 400 |
-| 400 | 200 | 1,000 |
-
-At MAX_ITER=160, saved policy targets already had 400-iteration quality. The 160 vs. 800 scaling comparison wasn't measuring what training actually saw — the policy head was never starved.
-
-But the unsaved moves matter too, because they determine game trajectories and therefore value targets. At 160, 75% of moves are played with only 80 iterations — a search so weak it barely deviates from the policy prior. The win/loss outcomes those games produce are noisy, and that noise flows directly into value training.
+### 5. Analyzing compute more
 
 ![MCTS Iteration Scaling](/img/mcts_iter_scaling.png)
 
-At MAX_ITER=160, entropy collapse is essentially zero (-0.003 bits) — visit entropy matches the prior almost exactly. The search isn't evaluating positions; it's confirming policy. Policy surprise rate is only 13.4%.
+At MAX_ITER=160, entropy collapse is 0.48 bits and policy surprise is 19.0%. The search is doing work, but is still mostly following the prior.
 
-By MAX_ITER=400, entropy collapse reaches ~0.20 bits, value spread starts rising, and policy surprise jumps toward 25%. The search is beginning to do real work. That's the target setting — not because saved policy targets improve (they were already 400-quality), but because the unsaved moves shaping game trajectories go from 80 iterations to 200.
+By MAX_ITER=400, entropy collapse reaches 0.67 bits and policy surprise reaches 28.5%. The search has a stronger influence over the final distribution, and continues to influence the distribution more and more as search increases. I settled with MAX_ITER=400 as a good balance between compute and search quality.
 
-> **The bottleneck wasn't policy supervision quality. It was the quality of the games the policy was played in.**
+### 6. Making changes
+
+Given these results, I changed the following three parameters:
+  - `DIRICHLET_ALPHA`: `0.05` → `0.1`
+  - `use_forced_playouts_and_policy_target_pruning`: `True` → `False`
+  - `max_iter`: `160` → `400`
+
+And the result?
+
+Training was still stagnant. The model showed early improvements in APP (attack per piece) and DSPP (downstack pieces per piece) before plateauing, then performed poorly during gating checks against previous checkpoints. The hyperparameters weren't the root cause — the local minimum runs deeper than that.
+
+![Gating Outcomes](/img/gating_outcomes.png)
+
+Each dot is a gating attempt — a match series against the previous accepted checkpoint, with a 52% win rate required for promotion. Green dots were accepted; red were rejected. Most challengers are failing to meet the threshold, showing that improvement is noisy and slow.
+
+## Chapter 2. Model Architecture
+
+This entire algorithmic process takes place on my macbook. I've been playing self-play games one at a time, and to maximize inference speed, I've been using Keras with TFLite as it works well with Macbook CPUs. Additionally, my limited compute means that I have to keep my models relatively small. This chapter will explore various model architectures, and having to navigate running an entire reinforcement pipeline on my macbook!

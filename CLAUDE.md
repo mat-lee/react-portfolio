@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 Monorepo containing:
-- **Portfolio** (codebymatthewlee.com) - React/Vite personal website
+- **Portfolio** (www.codebymatthewlee.com) - React/Vite personal website
 - **Labs** (labs.codebymatthewlee.com) - Docusaurus site for interactive explorations
 - **Demos** - Shared React components used by both sites
 
