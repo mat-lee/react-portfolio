@@ -17,6 +17,7 @@ const sidebars = {
       items: [
         'tetris/move-generation',
         'tetris/local-minima',
+        'tetris/reshaping-policy',
       ],
     },
     // Add more project categories here as you create them

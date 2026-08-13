@@ -1,0 +1,128 @@
+---
+title: Reshaping Policy
+sidebar_label: Reshaping Policy
+sidebar_position: 4
+tags: [tetris, reinforcement-learning, policy]
+---
+
+export const PIECES = [
+  { idx: '00', piece: 'O', rot: 'r0', label: 'O' },
+  { idx: '01', piece: 'Z', rot: 'r0', label: 'Z r0' },
+  { idx: '02', piece: 'Z', rot: 'r1', label: 'Z r1' },
+  { idx: '03', piece: 'S', rot: 'r0', label: 'S r0' },
+  { idx: '04', piece: 'S', rot: 'r1', label: 'S r1' },
+  { idx: '05', piece: 'I', rot: 'r0', label: 'I r0' },
+  { idx: '06', piece: 'I', rot: 'r1', label: 'I r1' },
+  { idx: '07', piece: 'L', rot: 'r0', label: 'L r0' },
+  { idx: '08', piece: 'L', rot: 'r1', label: 'L r1' },
+  { idx: '09', piece: 'L', rot: 'r2', label: 'L r2' },
+  { idx: '10', piece: 'L', rot: 'r3', label: 'L r3' },
+  { idx: '11', piece: 'J', rot: 'r0', label: 'J r0' },
+  { idx: '12', piece: 'J', rot: 'r1', label: 'J r1' },
+  { idx: '13', piece: 'J', rot: 'r2', label: 'J r2' },
+  { idx: '14', piece: 'J', rot: 'r3', label: 'J r3' },
+  { idx: '15', piece: 'T', rot: 'r0', label: 'T r0' },
+  { idx: '16', piece: 'T', rot: 'r1', label: 'T r1' },
+  { idx: '17', piece: 'T', rot: 'r2', label: 'T r2' },
+  { idx: '18', piece: 'T', rot: 'r3', label: 'T r3' },
+];
+
+export const MatrixGrid = ({ kind }) => (
+  <div
+    style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))',
+      gap: '0.75rem',
+      margin: '1rem 0',
+    }}
+  >
+    {PIECES.map(({ idx, piece, rot, label }) => {
+      const src = `/img/4/${idx}_${piece}_${rot}_${kind}.png`;
+      return (
+        <a
+          key={idx}
+          href={src}
+          target="_blank"
+          rel="noreferrer"
+          style={{ display: 'block', textAlign: 'center', textDecoration: 'none', color: 'inherit' }}
+        >
+          <img
+            src={src}
+            alt={`${label} ${kind} matrix`}
+            loading="lazy"
+            style={{
+              width: '100%',
+              height: 'auto',
+              display: 'block',
+              borderRadius: '4px',
+              imageRendering: 'pixelated',
+              background: 'var(--ifm-color-emphasis-100)',
+            }}
+          />
+          <div style={{ fontSize: '0.8rem', marginTop: '0.25rem', fontFamily: 'var(--ifm-font-family-monospace)' }}>
+            {label}
+          </div>
+        </a>
+      );
+    })}
+  </div>
+);
+
+# Reshaping Policy
+
+The policy for my tetris AI is the weird shape of (Rows - 1, cols + 1, 27). That's because each (x, y) pair of the policy represents the top left bounding box of where a Tetris piece can be placed, which, over all pieces, can be placed from columns -2 to 9, and can't be placed at the last row, hence Rows - 1 and Cols + 1. The Z coordinate means what rotation the piece is in. If a piece has symmetry, then for the purpose of the AI I count those as the same placement, e.g. the O piece has no rotations, and a Z piece is the same if you rotate 180 degrees, only the relative position of the Z within the bounding box is different.
+
+[insert img from tetris wiki]
+
+An extra 8 is to include T-spin mechanics and T-spin minis.
+
+Tetris at it's core is a very spatial and visual game. What would be amazing is if my policy could be (Rows, cols, 27), so that, using a resnet, I could output the final convolutional layer and use that to directly calculate the policy as the dims are the same. But, each piece has different x y coordinates that it can be placed in, additionally, this system would cause most policies to have 0's as returns, which isn't ideal (but would be fine).
+
+Is there a way that I can have the AI have an output for every cell on the Rows x Cols board, for each piece rotation? That way the policy is always the action space? By this method, you would need to be able to get actions out of it.
+
+I could convert my current data to that format: take the policy of a specific rotation, and for each action, map where those minos would go on a board. Do that for every action, sum it up, and boom there's a board with every mino as an output in a format that makes sense; it's essentially a heatmap of piece placements.
+
+The question is, is that reverse engineerable? If, given a heatmap, I could reverse engineer the weights of each action that sums to it?
+
+## version 1
+Lets see:
+
+Start with the piece rotation.
+
+[include example image]
+
+To create a heatmap, take every possible location of that piece in the board as a matrix, multiply it by it's weight, then sum those. That's the forward operation. Each cell in the heatmap grid equals the sum of the weights of every filter that interacts with it. We can write this as a matrix:
+
+Aw = y
+
+Where w = vector of filters w1 to wn
+y = grid rows x cols
+A = matrix rows x cols x n which, where each entry rows, cols has a vector length n which has a 1 if that filter is used, 0 else.
+The forward operation can be represented as Aw = y.
+
+Now the fun part.
+
+Computing the backwards means finding w, given A and y
+A is a tall matrix, as n is going to be smaller than rows * cols as you can fit fewer kernels than minos in a grid.
+That means this is essentially linear regression, thus you can solve for w using My where M = (A^A)^-1A. And you can precompute M! That means that converting a policy heatmap into an actionable policy means reshaping the policy then performing a matrix multiplication for each piece! Now all that's left is to precompute A and M for all pieces and their rotations.
+
+**A Matrices** — each tile shows the placement-incidence matrix for one piece rotation. Click any tile to open it full-size.
+
+<MatrixGrid kind="A" />
+
+**M Matrices** — the precomputed `(AᵀA)⁻¹Aᵀ` for each piece rotation.
+
+<MatrixGrid kind="M" />
+
+
+
+Notes: After further research, I realized this problem is simply deconvolution! Another way to process deconvolutions is using fourier transforms.
+
+
+## version 2
+The answer is: yes! After some experimentation and research I discovered deconvolutions! Essentially, given some filter (such as a blur) applied to an image, how can you recreate the original image as closely as possible? In this case, the mino heatmap is the filtered image, the mino matrix is the filter,  and the original image is the piece placements I want to solve for.
+
+Option 1: Use deconvolution matrices. This is the approach I figured out on my own after some tinkering.
+
+Option 2: Use fourier transforms. If an image is the sum of signals, and convolutions are multiplications in the signal domain, then you can convert the heatmap and piece matrix to a signal, divide to get the original image in signal form, then use an inverse fourier transform to get back the original image.
+

@@ -10,7 +10,7 @@ tags: [tetris, reinforcement-learning, policy]
 I've been training an AlphaZero-style agent to learn, on its own, how to play a form of turn-based TETR.IO, a kind of competitive
 two-player Tetris. After a while, however, progress stagnated. I used some statistics to track skill level, and they eventually flattened out. Additionally, the agent's win rate against previous checkpoints stopped moving.
 
-![Game replay](/img/game_replay_slow.gif)
+![Game replay](/img/3/game_replay_slow.gif)
 
 *A self-play game of my algorithm. Every game looks similar to this.*
 
@@ -33,7 +33,7 @@ without noise across a sweep of α values, tracking three things: how often the 
 changed, how broadly visits were spread, and how concentrated they were on the top
 move.
 
-![Dirichlet Alpha Analysis](/img/dirichlet_analysis.png)
+![Dirichlet Alpha Analysis](/img/3/dirichlet_analysis.png)
 
 The three panels tell the same story from different angles. At my production
 setting of α = 0.05 (marked with a red dashed line), the noise is at a solid level of increasing search diversity without overly changing chosen moves. The graphs also show that α = 0.001 barely affects the chosen move, while α > 0.3 makes the search chaotic.
@@ -47,7 +47,7 @@ These show that exploration is working as intended. I changed α: 0.05 -> 0.1 so
 Given that the dirichlet alpha was fine, my next focus was the Monte Carlo Tree Search, the tree search algorithm which uses the neural network's policy and value outputs to guide tree expansion to simulate game playouts. Across 5 games I collected
 nine relevant metrics:
 
-![MCTS Analysis, 160 Iterations](/img/mcts_analysis_160.png)
+![MCTS Analysis, 160 Iterations](/img/3/mcts_analysis_160.png)
 
 **Effective Branching %** (mean 52%) represents the percentage of child nodes of root node that were looked at. Notably, the
 distribution is bimodal. Most positions either have visits spread across nearly
@@ -74,7 +74,7 @@ shows that search is changing the decision about 1 in 4 times.
 
 #### Is the value head broken?
 
-![Value Reliability Diagram](/img/value_reliability.png)
+![Value Reliability Diagram](/img/3/value_reliability.png)
 
 Short answer: no. This reliability diagram shows the network's predicted win
 probability against actual outcomes, bucketed. Points on the diagonal mean perfect
@@ -86,7 +86,7 @@ However, the graph shows that the majority of positions are being evaluated as n
 
 Running the same analysis at 800 iterations (5× the default) to see what difference more compute makes.
 
-![MCTS Analysis, 800 Iterations](/img/mcts_analysis_800.png)
+![MCTS Analysis, 800 Iterations](/img/3/mcts_analysis_800.png)
 
 | Metric | 160 iter | 800 iter |
 |---|---:|---:|
@@ -124,7 +124,7 @@ To examine these, I compared these four configurations on identical positions:
  - **Train+CForced=3:** training mode with CForcedPlayout=3
  - **Train-Forced** standard training mode without forced playouts
 
-![Config Comparison Diagram](/img/config_comparison.png)
+![Config Comparison Diagram](/img/3/config_comparison.png)
 
 Comparing Train vs Train-Forced makes it clear: the **policy target pruning** that runs after move selection,
 deliberately zeroing out low-value visits before they become training labels is what's reducing the branching %.
@@ -138,7 +138,7 @@ Because the value head is already uncertain and possibly be causing the local mi
 
 The search diagnostics show that something is wrong, but they're taken from a single snapshot. The training loss curves provide more information about how well the algorithm is performing.
 
-![Training Loss Curves](/img/training_loss_curves.png)
+![Training Loss Curves](/img/3/training_loss_curves.png)
 
 Both heads have flatlined. Value MSE has hovered between 0.18 and 0.20 for the last 50 datasets, with a brief dip to ~0.18 around dataset that didn't hold. Policy cross-entropy shows the same pattern — the 5-set smoothed average sits around 1.56–1.64.
 
@@ -146,7 +146,7 @@ The loss curves do not directly measure playing strength; they measure how well 
 
 There's a second chart that adds a wrinkle to that picture.
 
-![Policy Entropy Over Training](/img/policy_entropy_training.png)
+![Policy Entropy Over Training](/img/3/policy_entropy_training.png)
 
 This tracks the mean Shannon entropy of the policy targets generated during self-play — a direct measure of how concentrated the search's move distributions are becoming. From datasets 0–80 the trend is flat around 0.91. After that it drops steadily to ~0.87 by dataset 100.
 
@@ -156,7 +156,7 @@ This means the search is producing increasingly concentrated move distributions.
 
 ### 5. Analyzing compute more
 
-![MCTS Iteration Scaling](/img/mcts_iter_scaling.png)
+![MCTS Iteration Scaling](/img/3/mcts_iter_scaling.png)
 
 At MAX_ITER=160, entropy collapse is 0.48 bits and policy surprise is 19.0%. The search is doing work, but is still mostly following the prior.
 
@@ -173,10 +173,50 @@ And the result?
 
 Training was still stagnant. The model showed early improvements in APP (attack per piece) and DSPP (downstack pieces per piece) before plateauing, then performed poorly during gating checks against previous checkpoints. The hyperparameters weren't the root cause — the local minimum runs deeper than that.
 
-![Gating Outcomes](/img/gating_outcomes.png)
+![Gating Outcomes](/img/3/gating_outcomes.png)
 
 Each dot is a gating attempt — a match series against the previous accepted checkpoint, with a 52% win rate required for promotion. Green dots were accepted; red were rejected. Most challengers are failing to meet the threshold, showing that improvement is noisy and slow.
 
 ## Chapter 2. Model Architecture
 
 This entire algorithmic process takes place on my macbook. I've been playing self-play games one at a time, and to maximize inference speed, I've been using Keras with TFLite as it works well with Macbook CPUs. Additionally, my limited compute means that I have to keep my models relatively small. This chapter will explore various model architectures, and having to navigate running an entire reinforcement pipeline on my macbook!
+
+Perhaps the issue is with the model, and interactions with TFLite and quantization. Time to rebuild the network!
+
+Difference #1: Auxiliary targets (garbage messiness, board height)
+DIfference #2: Use transformer based model
+
+<details>
+<summary>*Note: before this, I adjusted the board size to match TETR.IO's hidden board size, switched from TFLite to Pytorch and added batching to the selfplay loop*</summary>
+
+#### Table 1. Per-game PyTorch (ms)
+
+| filters | params (M) | B=1 | B=4 | B=16 | B=64 | B=128 | B=256 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| 16 | 18.64 | 8.20 | 2.22 | 0.51 | 0.12 | 0.10 | 0.10 |
+| 32 | 18.72 | 8.29 | 2.05 | 0.54 | 0.19 | 0.20 | 0.20 |
+| 64 | 19.06 | 7.39 | 2.24 | 0.54 | 0.50 | 0.50 | 0.51 |
+| 96 | 19.62 | 7.23 | 2.04 | 0.70 | 0.93 | 0.92 | 0.91 |
+| 128 | 20.40 | 7.66 | 1.98 | 1.49 | 1.51 | 1.50 | 1.44 |
+
+#### Table 2. Per-game Keras end-to-end (ms)
+
+| filters | params (M) | B=1 | B=4 | B=16 | B=64 | B=128 | B=256 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| 16 | 18.64 | 17.57 | 5.14 | 1.10 | 0.29 | 0.23 | 0.16 |
+| 32 | 18.72 | 16.72 | 4.29 | 1.37 | 0.44 | 0.33 | 0.26 |
+| 64 | 19.06 | 18.35 | 5.26 | 1.40 | 0.76 | 0.62 | 0.58 |
+| 96 | 19.62 | 16.86 | 4.33 | 1.63 | 1.16 | 1.05 | 1.00 |
+| 128 | 20.41 | 21.35 | 6.31 | 2.14 | 1.68 | 1.61 | 1.55 |
+
+#### Table 3. Per-game TFLite (ms)
+
+| filters | params (M) | B=1 | B=4 | B=16 | B=64 | B=128 | B=256 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| 16 | 18.64 | 5.11 | 4.89 | 2.30 | 1.47 | 1.38 | 1.33 |
+| 32 | 18.72 | 6.16 | 5.97 | 3.33 | 2.52 | 2.38 | 2.17 |
+| 64 | 19.06 | 11.22 | 9.85 | 5.92 | 5.56 | 5.25 | 5.18 |
+| 96 | 19.62 | 15.25 | 14.50 | 10.70 | 10.45 | 10.28 | 10.15 |
+| 128 | 20.41 | 22.94 | 20.91 | 17.89 | 17.51 | 17.91 | 17.54 |
+
+</details>

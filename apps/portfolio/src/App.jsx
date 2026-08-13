@@ -295,6 +295,28 @@ function MainApp() {
             <NavLink id="projects">Projects</NavLink>
             <NavLink id="contact">Contact</NavLink>
             <a
+              href="https://labs.codebymatthewlee.com"
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 16px',
+                border: '1px solid #d1d5db',
+                borderRadius: '9999px',
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#374151',
+                textDecoration: 'none',
+                transition: 'background-color 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              <FlaskConical size={16} /> Labs
+            </a>
+            <a
               href="mailto:matthewlee01234@gmail.com"
               style={{
                 display: 'inline-flex',
@@ -351,7 +373,7 @@ function MainApp() {
               <NavLink id="projects" mobile>Projects</NavLink>
               <NavLink id="contact" mobile>Contact</NavLink>
             </div>
-            <div style={{ marginTop: '16px', display: 'flex', gap: '12px' }}>
+            <div style={{ marginTop: '16px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               <a href="mailto:matthewlee01234@gmail.com" style={{
                 padding: '8px 16px',
                 border: '1px solid #d1d5db',
@@ -376,6 +398,20 @@ function MainApp() {
                 textDecoration: 'none'
               }}>
                 <Github size={16} /> GitHub
+              </a>
+              <a href="https://labs.codebymatthewlee.com" target="_blank" rel="noreferrer" style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 16px',
+                border: '1px solid #d1d5db',
+                borderRadius: '9999px',
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#374151',
+                textDecoration: 'none'
+              }}>
+                <FlaskConical size={16} /> Labs
               </a>
             </div>
           </div>
@@ -480,6 +516,28 @@ function MainApp() {
               onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
             >
               <Mail size={16} /> Email
+            </a>
+            <a
+              href="https://labs.codebymatthewlee.com"
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '12px 24px',
+                border: '1px solid #d1d5db',
+                borderRadius: '9999px',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#111827',
+                textDecoration: 'none',
+                transition: 'background-color 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              <FlaskConical size={16} /> Labs
             </a>
           </div>
         </div>

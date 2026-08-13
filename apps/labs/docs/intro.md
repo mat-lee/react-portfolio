@@ -20,6 +20,8 @@ Explorations and visualizations of my ideas
 
 <ul className="lab-list">
   <li><a href="/tetris/move-generation">Visualizing Move Generation</a></li>
+  <li><a href="/tetris/local-minima">Investigating a Local Minimum</a></li>
+  <li><a href="/tetris/reshaping-policy">Reshaping Policy</a></li>
 </ul>
 
 </details>
