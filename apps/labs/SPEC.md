@@ -1,6 +1,6 @@
 # Labs — Rebuild Spec
 
-A from-scratch spec for recreating labs.codebymatthewlee.com. Someone following
+A from-scratch spec for recreating labs.mat-lee.us. Someone following
 this exactly, with the same content files, produces a byte-for-byte-equivalent
 site. Split into two parts: **Part 1** is the literal recreation (stack,
 config, code). **Part 2** is the visual language (colors, type, spacing, and
@@ -43,7 +43,7 @@ import mdx from '@astrojs/mdx';
 import react from '@astrojs/react';
 
 export default defineConfig({
-  site: 'https://labs.codebymatthewlee.com',
+  site: 'https://labs.mat-lee.us',
   integrations: [mdx(), react()],
   server: { port: 3000 },
 });

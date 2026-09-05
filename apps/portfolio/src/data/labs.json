@@ -3,18 +3,18 @@
     "id": "tetris-move-generation",
     "projectId": "tetris-rl",
     "title": "Visualizing Move Generation",
-    "url": "https://labs.codebymatthewlee.com/tetris/move-generation"
+    "url": "https://labs.mat-lee.us/tetris/move-generation"
   },
   {
     "id": "tetris-local-minima",
     "projectId": "tetris-rl",
     "title": "Investigating a Local Minimum",
-    "url": "https://labs.codebymatthewlee.com/tetris/local-minima"
+    "url": "https://labs.mat-lee.us/tetris/local-minima"
   },
   {
     "id": "tetris-reshaping-policy",
     "projectId": "tetris-rl",
     "title": "Reshaping Policy",
-    "url": "https://labs.codebymatthewlee.com/tetris/reshaping-policy"
+    "url": "https://labs.mat-lee.us/tetris/reshaping-policy"
   }
 ]

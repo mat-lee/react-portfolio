@@ -4,7 +4,7 @@ import mdx from '@astrojs/mdx';
 import react from '@astrojs/react';
 
 export default defineConfig({
-  site: 'https://labs.codebymatthewlee.com',
+  site: 'https://labs.mat-lee.us',
   integrations: [mdx(), react()],
   server: { port: 3000 },
 });

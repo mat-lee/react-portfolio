@@ -1,6 +1,6 @@
 # Labs
 
-[labs.codebymatthewlee.com](https://labs.codebymatthewlee.com) — an Astro site for
+[labs.mat-lee.us](https://labs.mat-lee.us) — an Astro site for
 interactive explorations and writeups.
 
 ## Development

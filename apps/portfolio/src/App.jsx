@@ -295,7 +295,7 @@ function MainApp() {
             <NavLink id="projects">Projects</NavLink>
             <NavLink id="contact">Contact</NavLink>
             <a
-              href="https://labs.codebymatthewlee.com"
+              href="https://labs.mat-lee.us"
               target="_blank"
               rel="noreferrer"
               style={{
@@ -399,7 +399,7 @@ function MainApp() {
               }}>
                 <Github size={16} /> GitHub
               </a>
-              <a href="https://labs.codebymatthewlee.com" target="_blank" rel="noreferrer" style={{
+              <a href="https://labs.mat-lee.us" target="_blank" rel="noreferrer" style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '8px',
@@ -518,7 +518,7 @@ function MainApp() {
               <Mail size={16} /> Email
             </a>
             <a
-              href="https://labs.codebymatthewlee.com"
+              href="https://labs.mat-lee.us"
               target="_blank"
               rel="noreferrer"
               style={{
