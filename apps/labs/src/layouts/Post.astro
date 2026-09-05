@@ -1,0 +1,17 @@
+---
+import Base from './Base.astro';
+import { formatDate } from '../lib/date.js';
+
+const { title, description, date } = Astro.props;
+---
+
+<Base title={title} description={description}>
+  <header class="post-header">
+    <div class="feed-date">{formatDate(date)}</div>
+    <h1>{title}</h1>
+  </header>
+
+  <article class="prose">
+    <slot />
+  </article>
+</Base>

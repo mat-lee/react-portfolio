@@ -1,0 +1,116 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import { GROUPS } from '../data/groups.js';
+import { formatDate } from '../lib/date.js';
+
+const posts = await getCollection('labs', ({ data }) => !data.draft);
+
+// A post's group is its folder, if that folder is declared in GROUPS.
+const grouped = new Map();
+const standalone = [];
+for (const post of posts) {
+  const dir = post.id.includes('/') ? post.id.split('/')[0] : null;
+  if (dir && GROUPS[dir]) {
+    grouped.set(dir, [...(grouped.get(dir) ?? []), post]);
+  } else {
+    standalone.push(post);
+  }
+}
+
+// Sub-posts read in series order: explicit `order` first, then oldest to newest.
+const readingOrder = (a, b) =>
+  (a.data.order ?? Infinity) - (b.data.order ?? Infinity) ||
+  a.data.date - b.data.date;
+
+const items = [
+  ...standalone.map((post) => ({ kind: 'post', date: post.data.date, post })),
+  ...[...grouped].map(([id, children]) => ({
+    kind: 'group',
+    // A group is as recent as its newest child.
+    date: new Date(Math.max(...children.map((c) => +c.data.date))),
+    group: GROUPS[id],
+    children: children.sort(readingOrder),
+  })),
+].sort((a, b) => b.date - a.date);
+
+const socials = [
+  {
+    label: 'GitHub',
+    href: 'https://github.com/mat-lee',
+    path: 'M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0019 4.77 5.07 5.07 0 0018.91 1S17.73.65 15 2.48a13.38 13.38 0 00-7 0C5.27.65 4.09 1 4.09 1A5.07 5.07 0 004 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 008 18.13V22',
+  },
+  {
+    label: 'LinkedIn',
+    href: 'https://www.linkedin.com/in/matthew-lee-155896333/',
+    path: 'M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-4 0v7h-4v-11h4v1.5A4 4 0 0116 8zM6 9H2v12h4z M4 3.5a2 2 0 110 4 2 2 0 010-4z',
+  },
+  {
+    label: 'Email',
+    href: 'mailto:matthewlee01234@gmail.com',
+    path: 'M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z M22 6l-10 7L2 6',
+  },
+];
+---
+
+<Base
+  title="Labs"
+  description="Explorations and visualizations of my ideas — by Matthew Lee."
+>
+  <header class="home-header">
+    <h1>Labs</h1>
+    <p class="home-author">mat-lee</p>
+    <p class="home-tagline">Explorations and visualizations of my ideas.</p>
+
+    <div class="socials">
+      {
+        socials.map((s) => (
+          <a href={s.href} aria-label={s.label} target="_blank" rel="noreferrer">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d={s.path} />
+            </svg>
+          </a>
+        ))
+      }
+    </div>
+  </header>
+
+  <ul class="feed">
+    {
+      items.map((item) =>
+        item.kind === 'post' ? (
+          <li>
+            <div class="feed-date">{formatDate(item.post.data.date)}</div>
+            <h2 class="feed-title">
+              <a href={`/${item.post.id}`}>{item.post.data.title}</a>
+            </h2>
+            <p class="feed-description">{item.post.data.description}</p>
+          </li>
+        ) : (
+          <li>
+            <div class="feed-date">{formatDate(item.date)}</div>
+            <h2 class="feed-title">{item.group.title}</h2>
+            <p class="feed-description">{item.group.description}</p>
+            <ul class="subposts">
+              {item.children.map((child) => (
+                <li>
+                  <a href={`/${child.id}`}>{child.data.title}</a>
+                  <span class="feed-date">{formatDate(child.data.date)}</span>
+                </li>
+              ))}
+            </ul>
+          </li>
+        )
+      )
+    }
+  </ul>
+</Base>

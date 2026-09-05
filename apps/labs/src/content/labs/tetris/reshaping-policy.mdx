@@ -1,8 +1,9 @@
 ---
 title: Reshaping Policy
-sidebar_label: Reshaping Policy
-sidebar_position: 4
+date: 2026-08-13
+description: Reshaping the policy head into a board-shaped heatmap, and recovering piece placements back out of it with deconvolution.
 tags: [tetris, reinforcement-learning, policy]
+order: 3
 ---
 
 export const PIECES = [
@@ -67,8 +68,6 @@ export const MatrixGrid = ({ kind }) => (
     })}
   </div>
 );
-
-# Reshaping Policy
 
 The policy for my tetris AI is the weird shape of (Rows - 1, cols + 1, 27). That's because each (x, y) pair of the policy represents the top left bounding box of where a Tetris piece can be placed, which, over all pieces, can be placed from columns -2 to 9, and can't be placed at the last row, hence Rows - 1 and Cols + 1. The Z coordinate means what rotation the piece is in. If a piece has symmetry, then for the purpose of the AI I count those as the same placement, e.g. the O piece has no rotations, and a Z piece is the same if you rotate 180 degrees, only the relative position of the Z within the bounding box is different.
 

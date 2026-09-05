@@ -1,41 +1,24 @@
-# Website
+# Labs
 
-This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
+[labs.codebymatthewlee.com](https://labs.codebymatthewlee.com) — an Astro site for
+interactive explorations and writeups.
 
-## Installation
+## Development
 
-```bash
-yarn
-```
-
-## Local Development
+From the repo root:
 
 ```bash
-yarn start
+pnpm dev:labs     # localhost:3000
+pnpm build:labs   # static output in apps/labs/dist
 ```
 
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
+## Adding a lab
 
-## Build
+1. Create `src/content/labs/<group>/<slug>.mdx`. It becomes `/<group>/<slug>`.
+2. Frontmatter: `title`, `date`, `description` are required; `tags`, `order`
+   (reading position within the group), and `draft` are optional.
+3. To start a new group, add an entry to `src/data/groups.js` keyed by the folder
+   name. Posts in a folder with no entry there render as standalone.
 
-```bash
-yarn build
-```
-
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
-
-## Deployment
-
-Using SSH:
-
-```bash
-USE_SSH=true yarn deploy
-```
-
-Not using SSH:
-
-```bash
-GIT_USER=<Your GitHub username> yarn deploy
-```
-
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+React components go in `packages/demos` and need `client:only="react"` when
+imported into MDX if they touch the DOM on mount.

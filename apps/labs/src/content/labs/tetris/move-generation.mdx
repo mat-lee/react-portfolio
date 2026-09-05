@@ -1,11 +1,13 @@
 ---
-title: Visualizing Move Generation in Tetris
-description: An exploration of a move generation algorithm for modern Tetris.
-sidebar_position: 1
+title: Visualizing Move Generation
+date: 2026-01-13
+description: An interactive exploration of a move generation algorithm for modern Tetris.
 tags: [tetris, pathfinding, algorithms]
+order: 1
 ---
 
 import { TetrisMoveVisualizerIsolated } from '@portfolio/demos';
+import Callout from '../../../components/Callout.astro';
 
 export const TKI = [
   [1, 0, 0, 1, 1, 0, 1, 1, 0, 0],
@@ -15,11 +17,13 @@ export const TKI = [
 
 Draw on the board to place minos, select a piece, and explore how different algorithms discover all reachable positions
 
-:::tip Try it out!
-Click cells to place obstacles, pick a piece, then hit **Play**.
-:::
+<Callout type="tip" title="Try it out!">
 
-<TetrisMoveVisualizerIsolated initialRows={TKI} />
+Click cells to place obstacles, pick a piece, then hit **Play**.
+
+</Callout>
+
+<TetrisMoveVisualizerIsolated client:only="react" initialRows={TKI} />
 
 - **Reached**: queued to be explored later
 - **Popped**: fully explored
@@ -66,9 +70,11 @@ Additionally, a T-Spin may also be labeled as "mini", making it a **T-Spin Mini*
 - If either of the 2 corners that the T is "pointing" towards is not filled, then it's a mini.
 - Exception: This does **not** apply if the last rotation that the T-piece performed was performed using the last possible wallkick.
 
-:::note
+<Callout type="note">
+
 All the rules are a bit confusing. This means for T pieces, it's possible that a T-Spin Mini and a T-Spin can be placed in the exact same spot. It also means that a T-Spin Mini and a T without a spin can be placed in the exact same spot.
-:::
+
+</Callout>
 
 So the final data class for a piece location looks like this:
 
@@ -142,9 +148,11 @@ Will find every possible piece placement. Faster than brute force but the tricki
 
 ---
 
-:::info Terminology
+<Callout type="info" title="Terminology">
+
 - **Minos** — the individual squares in a tetromino
 - **Collision** — any overlap between minos and filled grid cells
 - **Kick** — an `(x, y)` offset tried during rotation to avoid collisions
 - **Placeable** — a state where the piece can lock / be placed
-:::
+
+</Callout>
