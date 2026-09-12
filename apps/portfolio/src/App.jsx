@@ -9,6 +9,8 @@ import { Home } from "./pages/Home";
 import { About } from "./pages/About";
 import { Projects } from "./pages/Projects";
 import { Contact } from "./pages/Contact";
+import { LabsIndex } from "./pages/labs/LabsIndex";
+import { LabsPost } from "./pages/labs/LabsPost";
 
 // How long a clicked crane's own fly-away reads on screen before we actually
 // swap routes. Crane3D's release spring (tension 50, friction 14) doesn't
@@ -69,6 +71,8 @@ function AppContent() {
               <Route path="/projects" element={<Projects />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/labs" element={<LabsIndex />} />
+              <Route path="/labs/*" element={<LabsPost />} />
             </Routes>
           </motion.div>
         </AnimatePresence>

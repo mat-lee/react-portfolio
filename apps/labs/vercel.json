@@ -1,5 +1,6 @@
 {
-  "buildCommand": "cd ../.. && pnpm --filter @portfolio/labs build",
-  "outputDirectory": "dist",
-  "installCommand": "cd ../.. && pnpm install"
+  "redirects": [
+    { "source": "/", "destination": "https://mat-lee.us/labs", "permanent": true },
+    { "source": "/:group/:slug", "destination": "https://mat-lee.us/labs/:group/:slug", "permanent": true }
+  ]
 }

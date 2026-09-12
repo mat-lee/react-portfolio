@@ -1,24 +1,10 @@
-# Labs
+# Labs (retired)
 
-[labs.mat-lee.us](https://labs.mat-lee.us) — an Astro site for
-interactive explorations and writeups.
+The Labs writeups now live inside `apps/portfolio` at `/labs` — see
+`apps/portfolio/src/content/labs/`.
 
-## Development
-
-From the repo root:
-
-```bash
-pnpm dev:labs     # localhost:3000
-pnpm build:labs   # static output in apps/labs/dist
-```
-
-## Adding a lab
-
-1. Create `src/content/labs/<group>/<slug>.mdx`. It becomes `/<group>/<slug>`.
-2. Frontmatter: `title`, `date`, `description` are required; `tags`, `order`
-   (reading position within the group), and `draft` are optional.
-3. To start a new group, add an entry to `src/data/groups.js` keyed by the folder
-   name. Posts in a folder with no entry there render as standalone.
-
-React components go in `packages/demos` and need `client:only="react"` when
-imported into MDX if they touch the DOM on mount.
+This directory is only a static redirect shim for the old
+`labs.mat-lee.us` deployment, so existing links keep working. It has no
+build step: `vercel.json`'s `redirects` sends old URLs to
+`mat-lee.us/labs/...`, and `index.html` is a plain fallback for anything
+Vercel's redirect rules don't already cover.

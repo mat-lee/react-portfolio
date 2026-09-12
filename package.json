@@ -4,9 +4,7 @@
   "scripts": {
     "dev": "pnpm -r --parallel dev",
     "dev:portfolio": "pnpm --filter @portfolio/app dev",
-    "dev:labs": "pnpm --filter @portfolio/labs dev",
     "build": "pnpm -r build",
-    "build:portfolio": "pnpm --filter @portfolio/app build",
-    "build:labs": "pnpm --filter @portfolio/labs build"
+    "build:portfolio": "pnpm --filter @portfolio/app build"
   }
 }

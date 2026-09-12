@@ -137,7 +137,7 @@ export function Scene3D({ visible, leavingPage, onCraneClick }) {
         <Suspense fallback={null}>
         <group>
           <Crane3D
-            position={[-2.4, 1.7, -0.5]}
+            position={[-3.6, 1.7, -0.5]}
             initialRotation={[0, 1.2, 0.02]}
             color="#ef4444"
             label="Projects"
@@ -147,21 +147,31 @@ export function Scene3D({ visible, leavingPage, onCraneClick }) {
             onClick={() => onCraneClick("/projects")}
           />
           <Crane3D
-            position={[0, 1.4, -1.5]}
+            position={[-1.2, 2.2, -2.0]}
+            initialRotation={[0, -2.0, -0.01]}
+            color="#10b981"
+            label="Labs"
+            delay={0.44}
+            isLeaving={leavingPage !== null}
+            visible={visible}
+            onClick={() => onCraneClick("/labs")}
+          />
+          <Crane3D
+            position={[1.2, 1.4, -0.5]}
             initialRotation={[0, 2.5, 0]}
             color="#f59e0b"
             label="About Me"
-            delay={0.44}
+            delay={0.48}
             isLeaving={leavingPage !== null}
             visible={visible}
             onClick={() => onCraneClick("/about")}
           />
           <Crane3D
-            position={[2.4, 1.9, -0.5]}
+            position={[3.6, 1.9, -1.5]}
             initialRotation={[0, -1.0, 0.03]}
             color="#3b82f6"
             label="Contact"
-            delay={0.48}
+            delay={0.52}
             isLeaving={leavingPage !== null}
             visible={visible}
             onClick={() => onCraneClick("/contact")}
