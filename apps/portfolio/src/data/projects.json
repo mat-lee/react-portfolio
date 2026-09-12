@@ -4,14 +4,14 @@
     "title": "Reinforcement Learning with TETRIS",
     "summary": "1v1 AlphaZero-style Tetris engine.",
     "github": "https://github.com/mat-lee/tetris-reinforcement-learning",
-    "labs": ["tetris-local-minima", "tetris-move-generation"]
+    "labs": ["tetris-local-minima", "tetris-move-generation", "tetris-reshaping-policy"]
   },
   {
     "id": "market-simulator",
     "title": "Market Simulator",
     "summary": "A simulation environment for testing algorithmic trading strategies.",
     "github": "https://github.com/mat-lee/market-simulator",
-    "labs": ["initial-design"]
+    "labs": []
   },
   {
     "id": "traffic-prediction",

@@ -1,4 +1,17 @@
 @import "tailwindcss";
+/* Tailwind v4 defaults `dark:` to the prefers-color-scheme media query;
+   AppContext toggles a `.dark` class on <html> instead (so the toggle can
+   override the OS setting and persist via localStorage), so `dark:` needs
+   to key off that class. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+html {
+  /* Always reserve the vertical scrollbar's space. Without this, a page's
+     own scrollbar appearing/disappearing shifts window.innerWidth right as
+     the crane scene fades in/out, which the r3f canvas would otherwise
+     resize into mid-transition. */
+  scrollbar-gutter: stable;
+}
 
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
