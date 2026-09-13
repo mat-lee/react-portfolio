@@ -4,7 +4,43 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Matthew Lee</title>
+    <meta
+      name="description"
+      content="Matthew Lee — Computer Science &amp; Mathematics student at UNC Chapel Hill, building ML/RL systems. Projects, writeups, and contact."
+    />
     <link href="/src/index.css" rel="stylesheet">
+    <!-- Structured data for scrapers/ATS/AI agents — the reliable,
+         parser-free way to get name/skills/links without walking the DOM.
+         Kept in sync by hand with src/pages/About.jsx's SKILLS list and
+         src/pages/Contact.jsx's LINKS list. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Matthew Lee",
+        "url": "https://mat-lee.us",
+        "description": "Computer Science & Mathematics student at UNC Chapel Hill, building ML/RL systems that go from research ideas to working software.",
+        "alumniOf": {
+          "@type": "CollegeOrUniversity",
+          "name": "University of North Carolina at Chapel Hill"
+        },
+        "knowsAbout": [
+          "Python",
+          "PyTorch",
+          "TensorFlow",
+          "Pandas",
+          "Scikit-learn",
+          "Machine Learning",
+          "Reinforcement Learning",
+          "Frontend Development",
+          "Backend Development"
+        ],
+        "sameAs": [
+          "https://github.com/mat-lee",
+          "https://www.linkedin.com/in/matthew-lee-155896333/"
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

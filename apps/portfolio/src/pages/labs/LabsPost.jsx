@@ -3,12 +3,17 @@ import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import { getLabsPost } from "../../lib/labsPosts";
 import { formatDate } from "../../lib/date";
+import { useDocumentMeta } from "../../lib/useDocumentMeta";
 import "../../styles/labs-prose.css";
 
 export function LabsPost() {
   const { "*": id } = useParams();
   const navigate = useNavigate();
   const post = getLabsPost(id);
+  useDocumentMeta(
+    post ? `${post.frontmatter.title} — Labs — Matthew Lee` : "Labs — Matthew Lee",
+    post ? post.frontmatter.description : undefined
+  );
 
   return (
     <div className="w-full min-h-screen bg-[#FBFBF9] dark:bg-[#020617] text-slate-900 dark:text-slate-100 px-6 py-16 md:py-24">
@@ -33,7 +38,14 @@ export function LabsPost() {
               <div className="text-sm text-slate-500 dark:text-slate-400">
                 {formatDate(new Date(post.frontmatter.date))}
               </div>
-              <h1 className="text-3xl font-bold tracking-tight mt-1">{post.frontmatter.title}</h1>
+              <div className="flex items-baseline gap-2 mt-1">
+                <h1 className="text-3xl font-bold tracking-tight">{post.frontmatter.title}</h1>
+                {post.frontmatter.kind && (
+                  <span className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">
+                    {post.frontmatter.kind}
+                  </span>
+                )}
+              </div>
             </header>
 
             <article className="labs-prose">

@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, ExternalLink, Github, FlaskConical } from "lucide-react";
 import { Tetrahedron } from "../components/Tetrahedron";
+import { useDocumentMeta } from "../lib/useDocumentMeta";
 import projectsData from "../data/projects.json";
 import labsData from "../data/labs.json";
 
@@ -16,6 +17,10 @@ function statusColor(status = "") {
 
 export function Projects() {
   const navigate = useNavigate();
+  useDocumentMeta(
+    "Projects — Matthew Lee",
+    "Selected projects by Matthew Lee: reinforcement learning, machine learning, and full-stack work."
+  );
 
   return (
     <div className="w-full min-h-screen bg-[#FBFBF9] dark:bg-[#020617] text-slate-900 dark:text-slate-100 px-6 py-16 md:py-24">

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Hand-maintained — only 3 published Labs posts exist, not worth a
+     build-time generator yet. Add a new <url> here whenever a new lab is
+     published (see CLAUDE.md's "Adding a New Lab"). -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://mat-lee.us/</loc></url>
+  <url><loc>https://mat-lee.us/about</loc></url>
+  <url><loc>https://mat-lee.us/projects</loc></url>
+  <url><loc>https://mat-lee.us/contact</loc></url>
+  <url><loc>https://mat-lee.us/labs</loc></url>
+  <url><loc>https://mat-lee.us/labs/tetris/move-generation</loc></url>
+  <url><loc>https://mat-lee.us/labs/tetris/local-minima</loc></url>
+  <url><loc>https://mat-lee.us/labs/tetris/reshaping-policy</loc></url>
+</urlset>

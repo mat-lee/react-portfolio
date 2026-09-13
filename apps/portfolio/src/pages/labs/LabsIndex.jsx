@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { LABS_GROUPS } from "../../data/labsGroups";
 import { labsPosts } from "../../lib/labsPosts";
 import { formatDate } from "../../lib/date";
+import { useDocumentMeta } from "../../lib/useDocumentMeta";
 
 // A post's group is its folder, if that folder is declared in LABS_GROUPS.
 function groupPosts(posts) {
@@ -25,6 +26,10 @@ const readingOrder = (a, b) => new Date(b.frontmatter.date) - new Date(a.frontma
 
 export function LabsIndex() {
   const navigate = useNavigate();
+  useDocumentMeta(
+    "Labs — Matthew Lee",
+    "Explorations and technical writeups by Matthew Lee, including an AlphaZero-style Tetris AI."
+  );
   const posts = labsPosts.filter((p) => !p.frontmatter.draft);
   const { grouped, standalone } = groupPosts(posts);
 
@@ -62,12 +67,19 @@ export function LabsIndex() {
             item.kind === "post" ? (
               <li key={item.post.id}>
                 <div className="text-sm text-slate-500 dark:text-slate-400">{formatDate(item.date)}</div>
-                <Link
-                  to={`/labs/${item.post.id}`}
-                  className="block text-xl font-semibold mt-1 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
-                >
-                  {item.post.frontmatter.title}
-                </Link>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <Link
+                    to={`/labs/${item.post.id}`}
+                    className="text-xl font-semibold hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                  >
+                    {item.post.frontmatter.title}
+                  </Link>
+                  {item.post.frontmatter.kind && (
+                    <span className="text-[11px] uppercase tracking-wide text-slate-400 dark:text-slate-500">
+                      {item.post.frontmatter.kind}
+                    </span>
+                  )}
+                </div>
                 <p className="text-slate-600 dark:text-slate-400 mt-1">{item.post.frontmatter.description}</p>
               </li>
             ) : (
@@ -84,6 +96,11 @@ export function LabsIndex() {
                       >
                         {child.frontmatter.title}
                       </Link>
+                      {child.frontmatter.kind && (
+                        <span className="text-[11px] uppercase tracking-wide text-slate-400 dark:text-slate-500 ml-2">
+                          {child.frontmatter.kind}
+                        </span>
+                      )}
                       <span className="text-sm text-slate-500 dark:text-slate-400 ml-2">
                         {formatDate(new Date(child.frontmatter.date))}
                       </span>

@@ -1,11 +1,16 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
+import { useDocumentMeta } from "../lib/useDocumentMeta";
 
 const SKILLS = ["Python", "PyTorch", "TensorFlow", "Pandas", "Scikit-learn", "Frontend", "Backend"];
 
 export function About() {
   const navigate = useNavigate();
+  useDocumentMeta(
+    "About — Matthew Lee",
+    "Matthew Lee is a Computer Science & Mathematics dual major at UNC Chapel Hill, focused on machine learning and reinforcement learning."
+  );
 
   return (
     <div className="w-full min-h-screen bg-[#FBFBF9] dark:bg-[#020617] text-slate-900 dark:text-slate-100 px-6 py-16 md:py-24">
@@ -37,11 +42,21 @@ export function About() {
 
         {/* Editorial treatment: a plain letter-spaced line instead of pill
             badges — quieter, and one less shape competing with the crane's
-            own faceted look. */}
+            own faceted look. A real list (not a joined string) so a
+            scraper/reader sees discrete skills, not one blob of text; the
+            "/" between items is a CSS separator, not part of the content. */}
         <div className="pt-6 border-t border-slate-200 dark:border-slate-800">
-          <div className="text-xs tracking-[0.1em] uppercase text-slate-500 dark:text-slate-400 leading-loose">
-            {SKILLS.join("  /  ")}
-          </div>
+          <ul
+            aria-label="Skills"
+            className="flex flex-wrap gap-x-2 gap-y-1 text-xs tracking-[0.1em] uppercase text-slate-500 dark:text-slate-400 leading-loose list-none p-0 m-0"
+          >
+            {SKILLS.map((skill, i) => (
+              <li key={skill} className="flex items-center gap-2">
+                {skill}
+                {i < SKILLS.length - 1 && <span aria-hidden="true">/</span>}
+              </li>
+            ))}
+          </ul>
         </div>
       </motion.div>
     </div>

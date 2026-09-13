@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import { Routes, Route, Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { AppProvider } from "./AppContext";
@@ -18,6 +18,47 @@ import { LabsPost } from "./pages/labs/LabsPost";
 // that — this just needs to outlast the "it flew away" read, not the whole
 // spring.
 const NAVIGATE_DELAY_MS = 550;
+
+// Home's only navigation is 3D-canvas clicks — invisible to a keyboard,
+// screen reader, or anything crawling the site without driving a mouse into
+// a WebGL canvas. This is the real, always-in-the-DOM way through the site;
+// plain instant navigation on purpose, it's not meant to compete with the
+// cranes as the primary interaction.
+const NAV_LINKS = [
+  { to: "/", label: "Home" },
+  { to: "/about", label: "About" },
+  { to: "/projects", label: "Projects" },
+  { to: "/labs", label: "Labs" },
+  { to: "/contact", label: "Contact" },
+];
+
+function SiteNav() {
+  const location = useLocation();
+  return (
+    <nav
+      aria-label="Primary"
+      className="fixed top-6 left-6 sm:left-8 z-40 flex gap-3 sm:gap-4 text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400"
+    >
+      {NAV_LINKS.map(({ to, label }) => {
+        const isCurrent = location.pathname === to;
+        return (
+          <Link
+            key={to}
+            to={to}
+            aria-current={isCurrent ? "page" : undefined}
+            className={
+              isCurrent
+                ? "text-slate-900 dark:text-slate-100"
+                : "hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
+            }
+          >
+            {label}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
 
 function AppContent() {
   const location = useLocation();
@@ -50,10 +91,11 @@ function AppContent() {
     <div className="relative min-h-screen">
       <Scene3D visible={isHome} leavingPage={leavingPage} onCraneClick={handleCraneClick} />
 
+      <SiteNav />
       <ThemeToggle simple={!isHome} />
       <ThemeTransition />
 
-      <div className="relative z-10 w-full min-h-screen pointer-events-none">
+      <main className="relative z-10 w-full min-h-screen pointer-events-none">
         {/* `location` is captured and handed to <Routes> explicitly so the
             outgoing page keeps rendering during its exit animation instead
             of instantly unmounting when the URL changes. */}
@@ -76,7 +118,7 @@ function AppContent() {
             </Routes>
           </motion.div>
         </AnimatePresence>
-      </div>
+      </main>
 
       <div className="fixed bottom-4 right-6 z-40 text-2xl opacity-70 pointer-events-none mix-blend-difference text-white">
         mat-lee

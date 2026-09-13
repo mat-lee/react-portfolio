@@ -68,6 +68,7 @@ my-portfolio/
    date: 2026-08-13
    description: One sentence, shown on the /labs feed.
    tags: [optional]
+   kind: Algorithm   # one-word/short-phrase label shown next to the title
    draft: false      # true excludes it from the feed/build
    ---
    ```
@@ -76,6 +77,7 @@ my-portfolio/
    standalone feed entries.
 3. **Add the link** to `apps/portfolio/src/data/labs.json` so it appears on
    the matching project card too (separate from the feed listing).
+4. **Add the URL** to `apps/portfolio/public/sitemap.xml`.
 
 ### Adding an interactive demo
 
