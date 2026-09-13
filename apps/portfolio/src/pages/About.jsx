@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 
-const TAGS = ["Python", "PyTorch", "Tensorflow", "Pandas", "Scikit-learn", "Frontend", "Backend"];
+const SKILLS = ["Python", "PyTorch", "TensorFlow", "Pandas", "Scikit-learn", "Frontend", "Backend"];
 
 export function About() {
   const navigate = useNavigate();
@@ -35,15 +35,13 @@ export function About() {
           problems and create a meaningful impact in the world.
         </p>
 
-        <div className="flex flex-wrap gap-2">
-          {TAGS.map((tag) => (
-            <span
-              key={tag}
-              className="inline-flex items-center px-3 py-1.5 rounded-full border border-slate-300 dark:border-slate-700 text-xs font-medium text-slate-600 dark:text-slate-400"
-            >
-              {tag}
-            </span>
-          ))}
+        {/* Editorial treatment: a plain letter-spaced line instead of pill
+            badges — quieter, and one less shape competing with the crane's
+            own faceted look. */}
+        <div className="pt-6 border-t border-slate-200 dark:border-slate-800">
+          <div className="text-xs tracking-[0.1em] uppercase text-slate-500 dark:text-slate-400 leading-loose">
+            {SKILLS.join("  /  ")}
+          </div>
         </div>
       </motion.div>
     </div>

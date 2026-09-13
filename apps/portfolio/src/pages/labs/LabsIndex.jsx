@@ -20,10 +20,8 @@ function groupPosts(posts) {
   return { grouped, standalone };
 }
 
-// Sub-posts read in series order: explicit `order` first, then oldest to newest.
-const readingOrder = (a, b) =>
-  (a.frontmatter.order ?? Infinity) - (b.frontmatter.order ?? Infinity) ||
-  new Date(a.frontmatter.date) - new Date(b.frontmatter.date);
+// Sub-posts within a group list newest first, same as the top-level feed.
+const readingOrder = (a, b) => new Date(b.frontmatter.date) - new Date(a.frontmatter.date);
 
 export function LabsIndex() {
   const navigate = useNavigate();

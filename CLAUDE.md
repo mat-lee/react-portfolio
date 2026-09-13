@@ -68,7 +68,6 @@ my-portfolio/
    date: 2026-08-13
    description: One sentence, shown on the /labs feed.
    tags: [optional]
-   order: 4          # reading position within the group
    draft: false      # true excludes it from the feed/build
    ---
    ```

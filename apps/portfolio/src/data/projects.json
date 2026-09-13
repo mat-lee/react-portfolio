@@ -7,13 +7,6 @@
     "labs": ["tetris-local-minima", "tetris-move-generation", "tetris-reshaping-policy"]
   },
   {
-    "id": "market-simulator",
-    "title": "Market Simulator",
-    "summary": "A simulation environment for testing algorithmic trading strategies.",
-    "github": "https://github.com/mat-lee/market-simulator",
-    "labs": []
-  },
-  {
     "id": "traffic-prediction",
     "title": "Traffic Accident Severity Prediction",
     "summary": "A lightweight ML app that predicts traffic accident severity using weather, time, and location features; includes a fast user demo.",
