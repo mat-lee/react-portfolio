@@ -1,16 +1,30 @@
 import { Routes, Route, Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import * as THREE from "three";
 import { AppProvider } from "./AppContext";
+import { TransitionProvider } from "./TransitionContext";
 import { Scene3D } from "./components/Scene3D";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { ThemeTransition } from "./components/ThemeTransition";
+import { KamiTransition } from "./components/KamiTransition";
+import { captureDomSnapshot } from "./lib/domSnapshot";
 import { Home } from "./pages/Home";
 import { About } from "./pages/About";
 import { Projects } from "./pages/Projects";
 import { Contact } from "./pages/Contact";
 import { LabsIndex } from "./pages/labs/LabsIndex";
 import { LabsPost } from "./pages/labs/LabsPost";
+
+// Routes that get the kami paper-fold transition instead of a plain fade —
+// matches the reference's own split (kami for the more editorial
+// destinations, plain fade for lists). Both directions (crane click in, Back
+// button out) use it; navigating within Labs (feed <-> a post) doesn't.
+const KAMI_ROUTES = new Set(["/about", "/labs"]);
+// How long the OTHER cranes get to visibly react (their own exit animation)
+// before the snapshot is taken and we navigate — shorter than the plain
+// fade's NAVIGATE_DELAY_MS since the fold itself is the main event here.
+const KAMI_LEAD_MS = 180;
 
 // How long a clicked crane's own fly-away reads on screen before we actually
 // swap routes. Crane3D's release spring (tension 50, friction 14) doesn't
@@ -69,9 +83,49 @@ function AppContent() {
   // navigate() call below. Passed to Scene3D as `leavingPage` so every
   // *other* crane starts its own exit too (see Crane3D's isLeaving effect).
   const [leavingPage, setLeavingPage] = useState(null);
+  // { texture, clickPos } while the kami overlay is mounted and folding;
+  // null the rest of the time (see KamiTransition.jsx — it's mounted fresh
+  // per transition, not kept alive).
+  const [kami, setKami] = useState(null);
 
-  const handleCraneClick = (route) => {
-    if (leavingPage) return;
+  const triggerKami = async (route, clickPos) => {
+    if (leavingPage || kami) return;
+    setLeavingPage(route);
+    await new Promise((resolve) => setTimeout(resolve, KAMI_LEAD_MS));
+
+    let canvas;
+    try {
+      canvas = await captureDomSnapshot();
+    } catch (err) {
+      console.error("kami snapshot failed, navigating without it", err);
+      navigate(route);
+      setLeavingPage(null);
+      return;
+    }
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.generateMipmaps = false;
+    texture.minFilter = THREE.LinearFilter;
+
+    navigate(route);
+    setLeavingPage(null);
+    setKami({ texture, clickPos });
+  };
+
+  const handleKamiSettled = () => {
+    setKami((prev) => {
+      prev?.texture.dispose();
+      return null;
+    });
+  };
+
+  const handleCraneClick = (route, clickPos) => {
+    if (leavingPage || kami) return;
+    if (KAMI_ROUTES.has(route)) {
+      triggerKami(route, clickPos);
+      return;
+    }
     setLeavingPage(route);
     setTimeout(() => {
       navigate(route);
@@ -95,30 +149,34 @@ function AppContent() {
       <ThemeToggle simple={!isHome} />
       <ThemeTransition />
 
-      <main className="relative z-10 w-full min-h-screen pointer-events-none">
-        {/* `location` is captured and handed to <Routes> explicitly so the
-            outgoing page keeps rendering during its exit animation instead
-            of instantly unmounting when the URL changes. */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={location.pathname}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            className={isHome ? "pointer-events-none w-full h-full" : "pointer-events-auto w-full h-full"}
-          >
-            <Routes location={location}>
-              <Route path="/" element={<Home />} />
-              <Route path="/projects" element={<Projects />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/labs" element={<LabsIndex />} />
-              <Route path="/labs/*" element={<LabsPost />} />
-            </Routes>
-          </motion.div>
-        </AnimatePresence>
-      </main>
+      <TransitionProvider triggerKami={triggerKami}>
+        <main className="relative z-10 w-full min-h-screen pointer-events-none">
+          {/* `location` is captured and handed to <Routes> explicitly so the
+              outgoing page keeps rendering during its exit animation instead
+              of instantly unmounting when the URL changes. */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className={isHome ? "pointer-events-none w-full h-full" : "pointer-events-auto w-full h-full"}
+            >
+              <Routes location={location}>
+                <Route path="/" element={<Home />} />
+                <Route path="/projects" element={<Projects />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/labs" element={<LabsIndex />} />
+                <Route path="/labs/*" element={<LabsPost />} />
+              </Routes>
+            </motion.div>
+          </AnimatePresence>
+        </main>
+      </TransitionProvider>
+
+      <KamiTransition texture={kami?.texture} clickPos={kami?.clickPos} onSettled={handleKamiSettled} />
 
       <div className="fixed bottom-4 right-6 z-40 text-2xl opacity-70 pointer-events-none mix-blend-difference text-white">
         mat-lee

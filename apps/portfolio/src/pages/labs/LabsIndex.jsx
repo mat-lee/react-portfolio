@@ -1,10 +1,11 @@
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import { LABS_GROUPS } from "../../data/labsGroups";
 import { labsPosts } from "../../lib/labsPosts";
 import { formatDate } from "../../lib/date";
 import { useDocumentMeta } from "../../lib/useDocumentMeta";
+import { useTransition } from "../../TransitionContext";
 
 // A post's group is its folder, if that folder is declared in LABS_GROUPS.
 function groupPosts(posts) {
@@ -25,7 +26,7 @@ function groupPosts(posts) {
 const readingOrder = (a, b) => new Date(b.frontmatter.date) - new Date(a.frontmatter.date);
 
 export function LabsIndex() {
-  const navigate = useNavigate();
+  const { triggerKami } = useTransition();
   useDocumentMeta(
     "Labs — Matthew Lee",
     "Explorations and technical writeups by Matthew Lee, including an AlphaZero-style Tetris AI."
@@ -53,7 +54,7 @@ export function LabsIndex() {
         transition={{ duration: 0.5 }}
       >
         <button
-          onClick={() => navigate("/")}
+          onClick={(e) => triggerKami("/", { x: e.clientX, y: e.clientY })}
           className="flex items-center gap-2 mb-12 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
         >
           <ArrowLeft className="w-5 h-5" /> Back

@@ -39,8 +39,13 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
+# Anchored to the repo root — an unanchored `lib/`/`lib64/` (this section is
+# the stock Python .gitignore template) matches ANY directory with that name
+# anywhere in the tree, which was silently swallowing every commit to
+# apps/portfolio/src/lib/ (a real JS source directory, not a Python build
+# artifact) without any warning.
+/lib/
+/lib64/
 parts/
 sdist/
 var/

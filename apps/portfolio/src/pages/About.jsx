@@ -1,12 +1,12 @@
-import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import { useDocumentMeta } from "../lib/useDocumentMeta";
+import { useTransition } from "../TransitionContext";
 
 const SKILLS = ["Python", "PyTorch", "TensorFlow", "Pandas", "Scikit-learn", "Frontend", "Backend"];
 
 export function About() {
-  const navigate = useNavigate();
+  const { triggerKami } = useTransition();
   useDocumentMeta(
     "About — Matthew Lee",
     "Matthew Lee is a Computer Science & Mathematics dual major at UNC Chapel Hill, focused on machine learning and reinforcement learning."
@@ -21,7 +21,7 @@ export function About() {
         transition={{ duration: 0.5 }}
       >
         <button
-          onClick={() => navigate("/")}
+          onClick={(e) => triggerKami("/", { x: e.clientX, y: e.clientY })}
           className="flex items-center gap-2 mb-12 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
         >
           <ArrowLeft className="w-5 h-5" /> Back

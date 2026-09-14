@@ -145,7 +145,7 @@ export function Crane3D({
     setInteractionState("releasing");
     document.body.style.cursor = "auto";
     audio.playFly();
-    onClick();
+    onClick({ x: e.clientX, y: e.clientY });
   };
 
   useFrame((_state, delta) => {

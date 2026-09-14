@@ -120,6 +120,7 @@ export function Scene3D({ visible, leavingPage, onCraneClick }) {
   // invisible scene from paying every-frame cost.
   return (
     <div
+      id="scene3d-canvas-root"
       className="absolute inset-0 z-0 pointer-events-none"
       style={{ opacity: visible ? 1 : 0, visibility: visible ? "visible" : "hidden" }}
     >
@@ -127,6 +128,11 @@ export function Scene3D({ visible, leavingPage, onCraneClick }) {
         shadows
         camera={{ position: [0, 3.5, 12], fov: 32, rotation: [-0.1, 0, 0] }}
         frameloop={visible ? "always" : "never"}
+        // Needed to read this canvas's pixels for the kami transition's
+        // snapshot when leaving Home (see lib/domSnapshot.js) — without it
+        // the browser is free to clear the drawing buffer right after
+        // compositing, and toDataURL()/drawImage() on it reads back blank.
+        gl={{ preserveDrawingBuffer: true }}
       >
         <SceneLightingAndFloor isDark={isDark} />
 
@@ -144,7 +150,7 @@ export function Scene3D({ visible, leavingPage, onCraneClick }) {
             delay={0.4}
             isLeaving={leavingPage !== null}
             visible={visible}
-            onClick={() => onCraneClick("/projects")}
+            onClick={(pos) => onCraneClick("/projects", pos)}
           />
           <Crane3D
             position={[-1.2, 2.2, -2.0]}
@@ -154,7 +160,7 @@ export function Scene3D({ visible, leavingPage, onCraneClick }) {
             delay={0.44}
             isLeaving={leavingPage !== null}
             visible={visible}
-            onClick={() => onCraneClick("/labs")}
+            onClick={(pos) => onCraneClick("/labs", pos)}
           />
           <Crane3D
             position={[1.2, 1.4, -0.5]}
@@ -164,7 +170,7 @@ export function Scene3D({ visible, leavingPage, onCraneClick }) {
             delay={0.48}
             isLeaving={leavingPage !== null}
             visible={visible}
-            onClick={() => onCraneClick("/about")}
+            onClick={(pos) => onCraneClick("/about", pos)}
           />
           <Crane3D
             position={[3.6, 1.9, -1.5]}
@@ -174,7 +180,7 @@ export function Scene3D({ visible, leavingPage, onCraneClick }) {
             delay={0.52}
             isLeaving={leavingPage !== null}
             visible={visible}
-            onClick={() => onCraneClick("/contact")}
+            onClick={(pos) => onCraneClick("/contact", pos)}
           />
         </group>
         </Suspense>
