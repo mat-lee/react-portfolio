@@ -236,7 +236,22 @@ function KamiScene({ texture, clickPos, onSettled, onFirstFrame, width, height }
   // single transition instead of once, ever.
   const materialRef = useRef(null);
   if (!materialRef.current) {
-    materialRef.current = new THREE.MeshBasicMaterial({ map: null, side: THREE.DoubleSide, toneMapped: false });
+    // A non-null PLACEHOLDER texture, not null — matches the reference's
+    // own `_foldPlaceholderTex` exactly, and for the same reason: tested
+    // directly (see git history) that toggling a material from map:null to
+    // a real map via `.needsUpdate = true` does NOT reliably force a
+    // shader recompile once the no-map program has already been
+    // precompiled (see this Canvas's onCreated) — every fold rendered
+    // solid white (MeshBasicMaterial's default color, i.e. USE_MAP never
+    // actually turned on), no error anywhere. Keeping USE_MAP permanently
+    // defined from the very first compile sidesteps the question of
+    // whether a later toggle recompiles at all: swapping `.map` afterward
+    // only ever changes texture CONTENT, never the material's shape.
+    materialRef.current = new THREE.MeshBasicMaterial({
+      map: new THREE.Texture(),
+      side: THREE.DoubleSide,
+      toneMapped: false,
+    });
   }
   useEffect(() => () => materialRef.current.dispose(), []);
 
@@ -270,6 +285,10 @@ function KamiScene({ texture, clickPos, onSettled, onFirstFrame, width, height }
     if (texture && currentTextureRef.current !== texture) {
       currentTextureRef.current = texture;
       materialRef.current.map = texture;
+      // Not a recompile trigger (the placeholder-texture trick above means
+      // USE_MAP is already baked in and never needs to toggle) — just
+      // three's normal signal that a texture's uniform/content changed.
+      materialRef.current.needsUpdate = true;
       resetToRest(geometry, grid, ids);
       activeRef.current.clear();
       startedRef.current = false;
