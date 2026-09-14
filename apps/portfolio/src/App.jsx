@@ -12,6 +12,7 @@ import { captureDomSnapshot } from "./lib/domSnapshot";
 import { Home } from "./pages/Home";
 import { About } from "./pages/About";
 import { Projects } from "./pages/Projects";
+import { Publications } from "./pages/Publications";
 import { Contact } from "./pages/Contact";
 import { LabsIndex } from "./pages/labs/LabsIndex";
 import { LabsPost } from "./pages/labs/LabsPost";
@@ -42,6 +43,7 @@ const NAV_LINKS = [
   { to: "/", label: "Home" },
   { to: "/about", label: "About" },
   { to: "/projects", label: "Projects" },
+  { to: "/publications", label: "Publications" },
   { to: "/labs", label: "Labs" },
   { to: "/contact", label: "Contact" },
 ];
@@ -166,6 +168,7 @@ function AppContent() {
               <Routes location={location}>
                 <Route path="/" element={<Home />} />
                 <Route path="/projects" element={<Projects />} />
+                <Route path="/publications" element={<Publications />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/labs" element={<LabsIndex />} />
