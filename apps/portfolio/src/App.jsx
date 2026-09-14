@@ -85,9 +85,10 @@ function AppContent() {
   // navigate() call below. Passed to Scene3D as `leavingPage` so every
   // *other* crane starts its own exit too (see Crane3D's isLeaving effect).
   const [leavingPage, setLeavingPage] = useState(null);
-  // { texture, clickPos } while the kami overlay is mounted and folding;
-  // null the rest of the time (see KamiTransition.jsx — it's mounted fresh
-  // per transition, not kept alive).
+  // { texture, clickPos } while the kami overlay is actively folding; null
+  // the rest of the time. KamiTransition's Canvas stays permanently
+  // mounted regardless (see its own comment) — this only toggles its
+  // visibility/frameloop.
   const [kami, setKami] = useState(null);
 
   const triggerKami = async (route, clickPos) => {
@@ -179,7 +180,7 @@ function AppContent() {
         </main>
       </TransitionProvider>
 
-      <KamiTransition texture={kami?.texture} clickPos={kami?.clickPos} onSettled={handleKamiSettled} />
+      <KamiTransition active={!!kami} texture={kami?.texture} clickPos={kami?.clickPos} onSettled={handleKamiSettled} />
 
       <div className="fixed bottom-4 right-6 z-40 text-2xl opacity-70 pointer-events-none mix-blend-difference text-white">
         mat-lee

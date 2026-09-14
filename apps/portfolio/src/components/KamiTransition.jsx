@@ -181,6 +181,24 @@ function buildSchedule(grid, ids, clickPos, width, height) {
   return scheduled.sort((a, b) => b.startTime - a.startTime);
 }
 
+// Writes every triangle's REST (flat, settled) vertices back into the
+// position buffer — needed because, unlike a fresh-mounted scene, this
+// geometry now persists and survives from one transition into the next:
+// the previous transition leaves every triangle collapsed to a point
+// (invisible), so the next one has to restore the whole grid before it can
+// cascade again.
+function resetToRest(geometry, grid, ids) {
+  const posAttr = geometry.attributes.position;
+  ids.forEach((id, i) => {
+    const tri = grid[id];
+    for (let v = 0; v < 3; v++) {
+      const [x, y] = tri.p[v];
+      posAttr.setXYZ(i * 3 + v, x, y, 0);
+    }
+  });
+  posAttr.needsUpdate = true;
+}
+
 function KamiScene({ texture, clickPos, onSettled, onFirstFrame, width, height }) {
   const grid = useMemo(() => buildGrid(width, height), [width, height]);
   const ids = useMemo(() => Object.keys(grid), [grid]);
@@ -207,43 +225,61 @@ function KamiScene({ texture, clickPos, onSettled, onFirstFrame, width, height }
     geo.setAttribute("uv", new THREE.BufferAttribute(uvs, 2));
     return geo;
   }, [grid, ids, width, height]);
-
-  const material = useMemo(
-    () => new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide, toneMapped: false }),
-    [texture]
-  );
-  useEffect(() => () => material.dispose(), [material]);
+  // Only fires on a real resize (a new geometry replacing this one) or true
+  // unmount — the geometry itself otherwise lives for the app's lifetime.
   useEffect(() => () => geometry.dispose(), [geometry]);
+
+  // One material for the app's lifetime, its `.map` swapped per transition
+  // instead of a new material recreated each time — matches the reference's
+  // own optimization (`foldMaterial.map = tex`): recreating the material
+  // would mean recompiling its shader (a real GPU-driver stall) on every
+  // single transition instead of once, ever.
+  const materialRef = useRef(null);
+  if (!materialRef.current) {
+    materialRef.current = new THREE.MeshBasicMaterial({ map: null, side: THREE.DoubleSide, toneMapped: false });
+  }
+  useEffect(() => () => materialRef.current.dispose(), []);
 
   // index -> { startTime, endTime, hinge: {axis, hingeP1} | null, restPts }
   const activeRef = useRef(new Map());
   // Tasks not yet started, sorted DESCENDING by startTime so the
   // soonest-ready one is always last (cheap pop instead of a full scan).
-  // null (not []) until the very first useFrame tick — see below for why
-  // scheduling happens there and not in a useEffect.
+  // null whenever nothing is scheduled (idle, between transitions).
   const pendingRef = useRef(null);
   const startedRef = useRef(false);
   const settledRef = useRef(false);
+  // Which texture instance the refs above are currently scheduled for —
+  // lets a persistently-mounted scene tell "a new transition just started"
+  // (a new texture arrived) apart from "still animating the same one",
+  // since it can no longer rely on a fresh mount to signal that for free.
+  const currentTextureRef = useRef(null);
 
   useFrame(() => {
-    // Scheduling the cascade here, on the first real animation frame,
-    // instead of in a useEffect: react-three-fiber runs its own render loop
-    // on its own schedule, separate from React-DOM's passive-effect timing
-    // (the same reason Crane3D's entrance spring uses useLayoutEffect, not
-    // useEffect) — a useEffect here raced with useFrame in practice: React
-    // StrictMode's dev-only double-invoke re-ran the scheduling effect a
-    // moment after the first run, and by the time it did, useFrame had
-    // already ticked once against the FIRST run's (about-to-be-discarded)
-    // schedule, occasionally observing it as trivially "idle" before the
-    // second run ever populated pendingRef — firing onSettled after ~130ms
-    // instead of the real ~1-1.5s cascade. This guard makes the schedule
-    // build exactly once, synchronously inside the frame loop itself, with
-    // no separate effect to race against.
-    if (pendingRef.current === null) {
+    // New transition detection (and the schedule build it triggers) lives
+    // here, in the frame loop itself, rather than a useEffect keyed on
+    // `texture`: react-three-fiber runs its own render loop on its own
+    // schedule, separate from React-DOM's passive-effect timing (the same
+    // reason Crane3D's entrance spring uses useLayoutEffect, not
+    // useEffect). A useEffect here raced with useFrame in practice: React
+    // StrictMode's dev-only double-invoke re-ran it a moment after the
+    // first run, and by the time it did, useFrame had already ticked once
+    // against the FIRST run's (about-to-be-discarded) schedule,
+    // occasionally observing it as trivially "idle" before the second run
+    // ever populated pendingRef — firing onSettled after ~130ms instead of
+    // the real ~1-2s cascade.
+    if (texture && currentTextureRef.current !== texture) {
+      currentTextureRef.current = texture;
+      materialRef.current.map = texture;
+      resetToRest(geometry, grid, ids);
+      activeRef.current.clear();
+      startedRef.current = false;
+      settledRef.current = false;
       pendingRef.current = buildSchedule(grid, ids, clickPos, width, height);
       audio.playUnfold();
       onFirstFrame();
     }
+
+    if (!pendingRef.current) return; // idle between transitions
 
     const now = performance.now();
     const pending = pendingRef.current;
@@ -294,33 +330,44 @@ function KamiScene({ texture, clickPos, onSettled, onFirstFrame, width, height }
     if (!idle) startedRef.current = true;
     if (startedRef.current && idle && !settledRef.current) {
       settledRef.current = true;
+      pendingRef.current = null; // back to idle — see the guard above
       onSettled();
     }
   });
 
-  return <mesh geometry={geometry} material={material} />;
+  return <mesh geometry={geometry} material={materialRef.current} />;
 }
 
-export function KamiTransition({ texture, clickPos, onSettled }) {
+export function KamiTransition({ active, texture, clickPos, onSettled }) {
   // Own state, not a ref: needs to trigger a re-render to swap the DOM
-  // fallback out for the real canvas. Resets naturally each transition —
-  // KamiTransition returns null between transitions (see the guard below),
-  // so this whole subtree (state included) is freshly mounted every time
-  // `texture` next becomes truthy, never carrying a stale true forward.
+  // fallback out for the real canvas. Reset explicitly on every new
+  // texture (not "on mount" — this component, and the Canvas below, now
+  // stay permanently mounted across every transition instead of one each;
+  // see the plan for why: mounting/unmounting a WebGL context per
+  // transition risked real browser context-loss stalls, the same problem
+  // the reference's own persistent Canvas avoids).
   const [firstFramePainted, setFirstFramePainted] = useState(false);
+  useEffect(() => {
+    if (texture) setFirstFramePainted(false);
+  }, [texture]);
 
-  if (!texture) return null;
   const width = window.innerWidth;
   const height = window.innerHeight;
 
   return (
-    <div id="kami-transition-container" className="fixed inset-0 z-50 pointer-events-none">
+    <div
+      id="kami-transition-container"
+      className="fixed inset-0 z-50 pointer-events-none"
+      style={{ opacity: active ? 1 : 0, visibility: active ? "visible" : "hidden" }}
+    >
       {/* Plain DOM stand-in for the gap between "texture ready" (synchronous
           with React's commit) and react-three-fiber's Canvas actually
           painting a frame — its own render loop, on its own schedule,
-          separate from React-DOM's, and WebGL context creation + first
-          shader compile isn't free (measured 100s of ms to multiple
-          seconds on a slow GPU/driver). Without this, whatever's behind
+          separate from React-DOM's. With a permanently-mounted Canvas this
+          gap should mostly disappear after the very first transition ever
+          (the context is already warm, and the material's shader is
+          precompiled at idle time below) — kept anyway as a safety net.
+          Without this, whatever's behind
           the overlay — the real destination page, already navigated to —
           shows through cleanly for that whole gap instead of the frozen
           snapshot, then the stale snapshot suddenly pops in and the
@@ -328,7 +375,7 @@ export function KamiTransition({ texture, clickPos, onSettled }) {
           transition. Same canvas the texture was built from, reused
           directly (no re-encode), removed the instant the real thing
           paints. */}
-      {!firstFramePainted && (
+      {texture && !firstFramePainted && (
         <div
           className="absolute inset-0"
           ref={(el) => {
@@ -342,7 +389,23 @@ export function KamiTransition({ texture, clickPos, onSettled }) {
           }}
         />
       )}
-      <Canvas gl={{ alpha: true }} frameloop="always">
+      <Canvas
+        gl={{ alpha: true }}
+        frameloop={active ? "always" : "never"}
+        onCreated={({ gl, scene, camera }) => {
+          // Force-compiles this scene's material's actual shader program
+          // (normally deferred until its first real draw call — a
+          // synchronous GPU-driver stall, tens to hundreds of ms) during
+          // idle time, so it doesn't land on the very first transition a
+          // visitor ever triggers.
+          const compile = () => gl.compile(scene, camera);
+          if ("requestIdleCallback" in window) {
+            window.requestIdleCallback(compile);
+          } else {
+            setTimeout(compile, 200);
+          }
+        }}
+      >
         <OrthographicCamera
           makeDefault
           left={0}
