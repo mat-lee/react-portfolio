@@ -5,32 +5,42 @@ import * as THREE from "three";
 import { audio } from "../audio";
 
 // The "kami" (paper) transition: a snapshot of the current page, sliced into
-// a coarse triangular grid, un-tears outward from the click point revealing
-// the destination page underneath — same idea as the origami-portfolio
-// reference's FoldTransition, deliberately scoped down (see the plan): a
-// much coarser grid animated with plain per-frame vertex math instead of a
-// custom shader + permanently-reused InstancedMesh, and mounted fresh per
-// transition instead of kept alive forever. Both trade real complexity the
-// reference needed (at 50x this grid's density, run continuously all
-// session) for simplicity that's fine at this effect's actual frequency.
-// Denser than the first pass (16x9 -> 22x13, ~2x the triangle count) and a
-// much flatter depth-speed curve (0.3->2 was a ~7x swing between the first
-// hops and the last; 0.75->1.35 is under 2x). At the old settings, expanding
-// mostly-uniformly-but-not-quite from a CORNER click point (e.g. the Back
-// button) reads as an almost-radial ring for a couple hops and then, once
-// speed ramps up, a fast diagonal sweep toward the opposite corner — at a
-// glance that's indistinguishable from a plain corner-to-corner wipe, not
-// paper tearing. Flattening the speed curve keeps the expansion visually
-// even in all directions regardless of where the click lands; the finer
-// grid keeps individual pieces small enough to read as shards, not blocks.
-const COLS = 22;
-const ROWS = 13;
-const BASE_DURATION = 240; // ms — one triangle's own fold
-const MIN_DURATION = 110;
-const DEPTH_SPEED_BASE = 0.75;
-const DEPTH_SPEED_PEAK = 1.35;
-const DEPTH_SPEED_RAMP = 14; // hops until cascade speed maxes out
-const STAGGER_SCALE = 46; // ms, scaled by depth speed + jitter
+// a triangular grid, un-tears outward from the click point revealing the
+// destination page underneath — ported from the origami-portfolio
+// reference's FoldTransition: same grid density (90x45), same cascade
+// timing formula and constants, including the deterministic per-triangle
+// jitter below (the reference calls this out explicitly: without it, the
+// cascade expands at the same average rate in every direction, which reads
+// as a suspiciously clean, radially-symmetric ring/wipe instead of an
+// organic tear — dropping it in an earlier pass here is exactly what made
+// this look like a plain wipe). What's still scoped down from the reference
+// (see the plan) is the *rendering*: plain per-frame vertex math on one
+// BufferGeometry instead of a custom onBeforeCompile shader + a
+// permanently-reused InstancedMesh, and mounted fresh per transition
+// instead of kept alive forever — those cut real complexity the reference
+// needed for running this continuously, all session, at this same density;
+// they don't change the cascade's own math or scale.
+const COLS = 90;
+const ROWS = 45;
+const FOLD_DURATION = 45; // ms — one triangle's own fold, before the speed multiplier below
+const FOLD_MIN_DURATION = 35;
+const STAGGER_SCALE = 2.5;
+const DEPTH_SPEED_BASE = 0.32;
+const DEPTH_SPEED_PEAK = 5;
+const DEPTH_SPEED_RAMP = 40; // hops until cascade speed maxes out
+// Global playback-speed multiplier, matching the reference's `foldSpeed`
+// (>1 = faster, <1 = slower) — applied by dividing, so this being under 1
+// makes everything take proportionally longer.
+const FOLD_SPEED = 0.8;
+
+// Deterministic per-triangle pseudo-random value in [0,1), from its grid
+// position — a fixed "personality" per triangle rather than pure per-hop
+// randomness. This is what keeps the cascade's edge looking like an organic
+// tear instead of a clean expanding ring.
+function triJitter(r, c) {
+  const h = Math.sin(r * 127.1 + c * 311.7) * 43758.5453;
+  return h - Math.floor(h);
+}
 
 function idOf(r, c, half) {
   return `${r},${c},${half}`;
@@ -145,15 +155,20 @@ function buildSchedule(grid, ids, clickPos, width, height) {
     for (const nid of neighborsOf(grid[id])) {
       if (!grid[nid] || bestArrival.has(nid)) continue;
 
+      const nTri = grid[nid];
       const rampT = Math.min(1, depth / DEPTH_SPEED_RAMP);
       const rampEase = rampT * rampT * (3 - 2 * rampT); // smoothstep
       const depthSpeed = DEPTH_SPEED_BASE + rampEase * (DEPTH_SPEED_PEAK - DEPTH_SPEED_BASE);
-      const duration = Math.max(MIN_DURATION, BASE_DURATION / depthSpeed);
-      // Wider than the first pass (0.6-1.4 -> 0.45-1.85) — a bigger per-hop
-      // spread is what makes the tear's edge look ragged/organic instead of
-      // a clean geometric wavefront.
-      const jitter = 0.45 + Math.random() * 1.4;
-      const startTime = arrival + (STAGGER_SCALE * jitter) / depthSpeed;
+      const duration = Math.max(FOLD_MIN_DURATION, FOLD_DURATION / depthSpeed) / FOLD_SPEED;
+      // Reference's exact shape: a per-hop random magnitude (mostly ~13,
+      // occasionally up to 14.5) scaled by each triangle's own fixed
+      // jitter "personality" (0.3-2.3) — the random term keeps every
+      // transition different, the deterministic term keeps any one
+      // triangle's relative timing consistent, which is what makes nearby
+      // triangles cohere into visible "fast lane" tears instead of static.
+      const jitter = 0.3 + triJitter(nTri.r, nTri.c) * 2.0;
+      const neighborStagger = (STAGGER_SCALE * (Math.random() * 3 + 11.5) * jitter) / depthSpeed / FOLD_SPEED;
+      const startTime = arrival + neighborStagger;
 
       bestArrival.set(nid, startTime);
       queue.push({ id: nid, arrival: startTime, depth: depth + 1 });
