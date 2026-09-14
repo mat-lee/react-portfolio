@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrthographicCamera } from "@react-three/drei";
 import * as THREE from "three";
@@ -13,14 +13,24 @@ import { audio } from "../audio";
 // transition instead of kept alive forever. Both trade real complexity the
 // reference needed (at 50x this grid's density, run continuously all
 // session) for simplicity that's fine at this effect's actual frequency.
-const COLS = 16;
-const ROWS = 9;
-const BASE_DURATION = 280; // ms — one triangle's own fold
-const MIN_DURATION = 130;
-const DEPTH_SPEED_BASE = 0.3;
-const DEPTH_SPEED_PEAK = 2;
-const DEPTH_SPEED_RAMP = 8; // hops until cascade speed maxes out
-const STAGGER_SCALE = 60; // ms, scaled by depth speed + jitter
+// Denser than the first pass (16x9 -> 22x13, ~2x the triangle count) and a
+// much flatter depth-speed curve (0.3->2 was a ~7x swing between the first
+// hops and the last; 0.75->1.35 is under 2x). At the old settings, expanding
+// mostly-uniformly-but-not-quite from a CORNER click point (e.g. the Back
+// button) reads as an almost-radial ring for a couple hops and then, once
+// speed ramps up, a fast diagonal sweep toward the opposite corner — at a
+// glance that's indistinguishable from a plain corner-to-corner wipe, not
+// paper tearing. Flattening the speed curve keeps the expansion visually
+// even in all directions regardless of where the click lands; the finer
+// grid keeps individual pieces small enough to read as shards, not blocks.
+const COLS = 22;
+const ROWS = 13;
+const BASE_DURATION = 240; // ms — one triangle's own fold
+const MIN_DURATION = 110;
+const DEPTH_SPEED_BASE = 0.75;
+const DEPTH_SPEED_PEAK = 1.35;
+const DEPTH_SPEED_RAMP = 14; // hops until cascade speed maxes out
+const STAGGER_SCALE = 46; // ms, scaled by depth speed + jitter
 
 function idOf(r, c, half) {
   return `${r},${c},${half}`;
@@ -139,7 +149,10 @@ function buildSchedule(grid, ids, clickPos, width, height) {
       const rampEase = rampT * rampT * (3 - 2 * rampT); // smoothstep
       const depthSpeed = DEPTH_SPEED_BASE + rampEase * (DEPTH_SPEED_PEAK - DEPTH_SPEED_BASE);
       const duration = Math.max(MIN_DURATION, BASE_DURATION / depthSpeed);
-      const jitter = 0.6 + Math.random() * 0.8;
+      // Wider than the first pass (0.6-1.4 -> 0.45-1.85) — a bigger per-hop
+      // spread is what makes the tear's edge look ragged/organic instead of
+      // a clean geometric wavefront.
+      const jitter = 0.45 + Math.random() * 1.4;
       const startTime = arrival + (STAGGER_SCALE * jitter) / depthSpeed;
 
       bestArrival.set(nid, startTime);
@@ -153,7 +166,7 @@ function buildSchedule(grid, ids, clickPos, width, height) {
   return scheduled.sort((a, b) => b.startTime - a.startTime);
 }
 
-function KamiScene({ texture, clickPos, onSettled, width, height }) {
+function KamiScene({ texture, clickPos, onSettled, onFirstFrame, width, height }) {
   const grid = useMemo(() => buildGrid(width, height), [width, height]);
   const ids = useMemo(() => Object.keys(grid), [grid]);
   const indexOf = useMemo(() => Object.fromEntries(ids.map((id, i) => [id, i])), [ids]);
@@ -214,6 +227,7 @@ function KamiScene({ texture, clickPos, onSettled, width, height }) {
     if (pendingRef.current === null) {
       pendingRef.current = buildSchedule(grid, ids, clickPos, width, height);
       audio.playUnfold();
+      onFirstFrame();
     }
 
     const now = performance.now();
@@ -273,12 +287,46 @@ function KamiScene({ texture, clickPos, onSettled, width, height }) {
 }
 
 export function KamiTransition({ texture, clickPos, onSettled }) {
+  // Own state, not a ref: needs to trigger a re-render to swap the DOM
+  // fallback out for the real canvas. Resets naturally each transition —
+  // KamiTransition returns null between transitions (see the guard below),
+  // so this whole subtree (state included) is freshly mounted every time
+  // `texture` next becomes truthy, never carrying a stale true forward.
+  const [firstFramePainted, setFirstFramePainted] = useState(false);
+
   if (!texture) return null;
   const width = window.innerWidth;
   const height = window.innerHeight;
 
   return (
     <div id="kami-transition-container" className="fixed inset-0 z-50 pointer-events-none">
+      {/* Plain DOM stand-in for the gap between "texture ready" (synchronous
+          with React's commit) and react-three-fiber's Canvas actually
+          painting a frame — its own render loop, on its own schedule,
+          separate from React-DOM's, and WebGL context creation + first
+          shader compile isn't free (measured 100s of ms to multiple
+          seconds on a slow GPU/driver). Without this, whatever's behind
+          the overlay — the real destination page, already navigated to —
+          shows through cleanly for that whole gap instead of the frozen
+          snapshot, then the stale snapshot suddenly pops in and the
+          cascade starts playing catch-up: reads as a broken flash, not a
+          transition. Same canvas the texture was built from, reused
+          directly (no re-encode), removed the instant the real thing
+          paints. */}
+      {!firstFramePainted && (
+        <div
+          className="absolute inset-0"
+          ref={(el) => {
+            const canvas = texture.image;
+            if (el && canvas.parentElement !== el) {
+              canvas.style.width = "100%";
+              canvas.style.height = "100%";
+              canvas.style.display = "block";
+              el.appendChild(canvas);
+            }
+          }}
+        />
+      )}
       <Canvas gl={{ alpha: true }} frameloop="always">
         <OrthographicCamera
           makeDefault
@@ -290,7 +338,14 @@ export function KamiTransition({ texture, clickPos, onSettled }) {
           far={2000}
           position={[0, 0, 1000]}
         />
-        <KamiScene texture={texture} clickPos={clickPos} onSettled={onSettled} width={width} height={height} />
+        <KamiScene
+          texture={texture}
+          clickPos={clickPos}
+          onSettled={onSettled}
+          onFirstFrame={() => setFirstFramePainted(true)}
+          width={width}
+          height={height}
+        />
       </Canvas>
     </div>
   );
