@@ -27,5 +27,16 @@
     "tags": ["Web scraping", "NLP", "Clustering", "Full-stack"],
     "status": "Ongoing project",
     "labs": []
+  },
+  {
+    "id": "ai-card-games",
+    "title": "AI Card Games",
+    "summary": "Play card games against near-perfect AIs, each with a writeup on how it was solved with game theory — Goofspiel is up first, with Kuhn Poker, Coup, and more on the way.",
+    "link": "https://play.mat-lee.us",
+    "linkText": "Play",
+    "github": "https://github.com/mat-lee/cards-and-games",
+    "tags": ["Game Theory", "Nash Equilibria", "CFR", "Reinforcement Learning"],
+    "status": "Ongoing project",
+    "labs": []
   }
 ]

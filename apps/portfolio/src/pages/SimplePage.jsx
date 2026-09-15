@@ -3,6 +3,7 @@ import { useDocumentMeta } from "../lib/useDocumentMeta";
 import { CONTACT_LINKS } from "./Contact";
 import projectsData from "../data/projects.json";
 import labsData from "../data/labs.json";
+import publicationsData from "../data/publications.json";
 
 const SKILLS = ["Python", "PyTorch", "TensorFlow", "Pandas", "Scikit-learn", "Frontend", "Backend"];
 const NAV = [
@@ -94,7 +95,25 @@ export function SimplePage() {
           <h2 className="text-[13px] uppercase tracking-[0.08em] font-semibold text-slate-500 dark:text-slate-400 mb-4">
             Publications
           </h2>
-          <p className="text-slate-500 dark:text-slate-400 text-[15px] m-0">Nothing published yet — check back soon.</p>
+          {publicationsData.length === 0 ? (
+            <p className="text-slate-500 dark:text-slate-400 text-[15px] m-0">Nothing published yet — check back soon.</p>
+          ) : (
+            <ul className="list-none m-0 p-0 space-y-4">
+              {publicationsData.map((pub) => (
+                <li key={pub.id}>
+                  <h3 className="text-[15px] font-semibold">{pub.title}</h3>
+                  <p className="text-slate-500 dark:text-slate-400 text-sm">
+                    {pub.authors} — {pub.venue}
+                  </p>
+                  {pub.link && (
+                    <a href={pub.link} target="_blank" rel="noreferrer" className="text-sm text-blue-700 dark:text-blue-400 hover:underline">
+                      Read →
+                    </a>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
         <hr className="border-t border-slate-200 dark:border-slate-800 mb-10" />
 

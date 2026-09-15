@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import { useDocumentMeta } from "../lib/useDocumentMeta";
+import { CONTACT_LINKS } from "./Contact";
 
 const SKILLS = ["Python", "PyTorch", "TensorFlow", "Pandas", "Scikit-learn", "Frontend", "Backend"];
 
@@ -57,6 +58,23 @@ export function About() {
               </li>
             ))}
           </ul>
+        </div>
+
+        {/* A copy of the Contact page's own links, so a visitor reading
+            About doesn't have to leave the page to find them. */}
+        <div className="pt-8 mt-8 border-t border-slate-200 dark:border-slate-800 space-y-4">
+          {CONTACT_LINKS.map(({ href, icon: Icon, text, external }) => (
+            <a
+              key={href}
+              href={href}
+              target={external ? "_blank" : undefined}
+              rel={external ? "noreferrer" : undefined}
+              className="flex items-center gap-3 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
+            >
+              <Icon className="w-5 h-5" />
+              <span className="text-base">{text}</span>
+            </a>
+          ))}
         </div>
       </motion.div>
     </div>
