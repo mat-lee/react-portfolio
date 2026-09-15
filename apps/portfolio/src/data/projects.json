@@ -1,21 +1,21 @@
 [
   {
+    "id": "ai-card-games",
+    "title": "AI Card Games",
+    "summary": "Play card games against near-perfect AIs, each with a writeup on how it was solved with game theory — Goofspiel is up first, with Kuhn Poker, Coup, and more on the way.",
+    "link": "https://play.mat-lee.us",
+    "linkText": "Play",
+    "github": "https://github.com/mat-lee/cards-and-games",
+    "tags": ["Game Theory", "Nash Equilibria", "CFR", "Reinforcement Learning"],
+    "status": "Ongoing project",
+    "labs": []
+  },
+  {
     "id": "tetris-rl",
     "title": "Reinforcement Learning with TETRIS",
     "summary": "1v1 AlphaZero-style Tetris engine.",
     "github": "https://github.com/mat-lee/tetris-reinforcement-learning",
     "labs": ["tetris-local-minima", "tetris-move-generation", "tetris-reshaping-policy"]
-  },
-  {
-    "id": "traffic-prediction",
-    "title": "Traffic Accident Severity Prediction",
-    "summary": "A lightweight ML app that predicts traffic accident severity using weather, time, and location features; includes a fast user demo.",
-    "link": "https://mat-lee-traffic-demo.streamlit.app/",
-    "linkText": "Demo",
-    "github": "https://github.com/mat-lee/traffic-demo",
-    "tags": ["Pandas", "Scikit-learn", "Streamlit", "Data Analysis"],
-    "status": "Public interactive app",
-    "labs": []
   },
   {
     "id": "advice-aggregator",
@@ -29,14 +29,14 @@
     "labs": []
   },
   {
-    "id": "ai-card-games",
-    "title": "AI Card Games",
-    "summary": "Play card games against near-perfect AIs, each with a writeup on how it was solved with game theory — Goofspiel is up first, with Kuhn Poker, Coup, and more on the way.",
-    "link": "https://play.mat-lee.us",
-    "linkText": "Play",
-    "github": "https://github.com/mat-lee/cards-and-games",
-    "tags": ["Game Theory", "Nash Equilibria", "CFR", "Reinforcement Learning"],
-    "status": "Ongoing project",
+    "id": "traffic-prediction",
+    "title": "Traffic Accident Severity Prediction",
+    "summary": "A lightweight ML app that predicts traffic accident severity using weather, time, and location features; includes a fast user demo.",
+    "link": "https://mat-lee-traffic-demo.streamlit.app/",
+    "linkText": "Demo",
+    "github": "https://github.com/mat-lee/traffic-demo",
+    "tags": ["Pandas", "Scikit-learn", "Streamlit", "Data Analysis"],
+    "status": "Public interactive app",
     "labs": []
   }
 ]

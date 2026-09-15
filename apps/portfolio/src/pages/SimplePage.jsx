@@ -103,7 +103,8 @@ export function SimplePage() {
                 <li key={pub.id}>
                   <h3 className="text-[15px] font-semibold">{pub.title}</h3>
                   <p className="text-slate-500 dark:text-slate-400 text-sm">
-                    {pub.authors} — {pub.venue}
+                    {pub.authors}
+                    {pub.venue && ` — ${pub.venue}`}
                   </p>
                   {pub.link && (
                     <a href={pub.link} target="_blank" rel="noreferrer" className="text-sm text-blue-700 dark:text-blue-400 hover:underline">

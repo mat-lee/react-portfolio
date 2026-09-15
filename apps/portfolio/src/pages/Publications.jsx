@@ -28,7 +28,8 @@ export function Publications() {
               <li key={pub.id}>
                 <h3 className="text-lg font-semibold">{pub.title}</h3>
                 <p className="text-slate-500 dark:text-slate-400 text-sm mt-0.5">
-                  {pub.authors} — {pub.venue}
+                  {pub.authors}
+                  {pub.venue && ` — ${pub.venue}`}
                 </p>
                 {pub.link && (
                   <a
