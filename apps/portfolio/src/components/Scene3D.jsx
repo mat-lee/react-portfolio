@@ -77,7 +77,7 @@ function useGroundDotsTexture(isDark) {
     const ctx = canvas.getContext("2d");
     ctx.fillStyle = isDark ? "rgba(255,255,255,0.55)" : "rgba(15,23,42,0.35)";
     ctx.beginPath();
-    ctx.arc(size / 2, size / 2, 2.4, 0, Math.PI * 2);
+    ctx.arc(size / 2, size / 2, 1.0, 0, Math.PI * 2);
     ctx.fill();
     const tex = new THREE.CanvasTexture(canvas);
     tex.wrapS = THREE.RepeatWrapping;
@@ -154,7 +154,7 @@ export function Scene3D({ visible, leavingPage, onCraneClick }) {
     >
       <Canvas
         shadows
-        camera={{ position: [0, 3.5, 12], fov: 32, rotation: [-0.1, 0, 0] }}
+        camera={{ position: [0, 3.5, 12], fov: 32, rotation: [-0.16, 0, 0] }}
         frameloop={visible ? "always" : "never"}
         // Needed to read this canvas's pixels for the kami transition's
         // snapshot when leaving Home (see lib/domSnapshot.js) — without it
@@ -170,8 +170,13 @@ export function Scene3D({ visible, leavingPage, onCraneClick }) {
             a Suspense boundary on its own. */}
         <Suspense fallback={null}>
         <group>
+          {/* Evenly spaced and centered on 0 — same 1.85-unit step as the
+              original 5-crane row, just re-centered now that Contact moved
+              out of this row onto the ground (see below), which otherwise
+              left a gap on the right and made the remaining four read as
+              left-heavy. */}
           <Crane3D
-            position={[-3.7, 1.7, -0.5]}
+            position={[-2.775, 1.7, -0.5]}
             initialRotation={[0, 1.2, 0.02]}
             color="#ef4444"
             label="Projects"
@@ -181,7 +186,7 @@ export function Scene3D({ visible, leavingPage, onCraneClick }) {
             onClick={(pos) => onCraneClick("/projects", pos)}
           />
           <Crane3D
-            position={[-1.85, 2.1, -2.0]}
+            position={[-0.925, 2.1, -2.0]}
             initialRotation={[0, -1.8, -0.01]}
             color="#10b981"
             label="Publications"
@@ -191,7 +196,7 @@ export function Scene3D({ visible, leavingPage, onCraneClick }) {
             onClick={(pos) => onCraneClick("/publications", pos)}
           />
           <Crane3D
-            position={[0, 1.5, -1.0]}
+            position={[0.925, 1.5, -1.0]}
             initialRotation={[0, 0.6, 0.02]}
             color="#3b82f6"
             label="Labs"
@@ -201,7 +206,7 @@ export function Scene3D({ visible, leavingPage, onCraneClick }) {
             onClick={(pos) => onCraneClick("/labs", pos)}
           />
           <Crane3D
-            position={[1.85, 1.9, -0.5]}
+            position={[2.775, 1.9, -0.5]}
             initialRotation={[0, 2.5, 0]}
             color="#f59e0b"
             label="About Me"
