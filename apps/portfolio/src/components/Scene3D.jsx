@@ -187,10 +187,26 @@ export function Scene3D({ visible, leavingPage, onCraneClick }) {
             initialRotation={[0, -1.0, 0.03]}
             color="#3b82f6"
             label="Contact"
+            variant="airplane"
             delay={0.52}
             isLeaving={leavingPage !== null}
             visible={visible}
             onClick={(pos) => onCraneClick("/contact", pos)}
+          />
+          {/* Sits on the floor instead of hanging, and smaller than the rest
+              — a distinct, plain alternative to the 3D site itself, not
+              another destination alongside it. */}
+          <Crane3D
+            position={[0, -0.1, 0.8]}
+            initialRotation={[0, 0.4, 0]}
+            color="#94a3b8"
+            label="Simple Website"
+            grounded
+            scale={0.7}
+            delay={0.56}
+            isLeaving={leavingPage !== null}
+            visible={visible}
+            onClick={(pos) => onCraneClick("/simple", pos)}
           />
         </group>
         </Suspense>

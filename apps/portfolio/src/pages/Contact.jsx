@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Mail, Github, Linkedin } from "lucide-react";
 import { useDocumentMeta } from "../lib/useDocumentMeta";
 
-const LINKS = [
+export const CONTACT_LINKS = [
   { href: "mailto:matthewlee01234@gmail.com", icon: Mail, text: "matthewlee01234@gmail.com", external: false },
   { href: "https://github.com/mat-lee", icon: Github, text: "github.com/mat-lee", external: true },
   {
@@ -36,7 +36,7 @@ export function Contact() {
         <h1 className="text-3xl font-bold tracking-tight mb-8">Contact</h1>
 
         <div className="space-y-4">
-          {LINKS.map(({ href, icon: Icon, text, external }) => (
+          {CONTACT_LINKS.map(({ href, icon: Icon, text, external }) => (
             <a
               key={href}
               href={href}

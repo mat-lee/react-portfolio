@@ -6,6 +6,26 @@ import { Html, useGLTF } from "@react-three/drei";
 import { audio } from "../audio";
 import { useAppContext } from "../AppContext";
 
+// A simple stylized paper dart, built directly instead of loaded from a
+// file — two flat wing panels meeting at a raised centerline fold, nose
+// pointing toward +Z. Avoids sourcing/licensing a second GLTF model just
+// for one crane; same paper material (color, bump map) as the real crane
+// model gets applied to it below, so it reads as part of the same family.
+function buildAirplaneGeometry() {
+  const v = new Float32Array([
+    // left wing: nose -> ridge -> wingtip, nose -> wingtip -> tail corner
+    0, 0.05, 1.6, 0, 0.3, -1.2, -1.5, -0.3, -0.7,
+    0, 0.05, 1.6, -1.5, -0.3, -0.7, -0.35, -0.05, -1.5,
+    // right wing (mirrored)
+    0, 0.05, 1.6, 1.5, -0.3, -0.7, 0, 0.3, -1.2,
+    0, 0.05, 1.6, 0.35, -0.05, -1.5, 1.5, -0.3, -0.7,
+  ]);
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.BufferAttribute(v, 3));
+  geo.computeVertexNormals();
+  return geo;
+}
+
 export function Crane3D({
   position,
   initialRotation = [0, 0, 0],
@@ -15,6 +35,15 @@ export function Crane3D({
   isLeaving,
   visible,
   delay = 0,
+  // "crane" (default) loads the GLTF crane model; "airplane" builds the
+  // procedural paper dart above instead.
+  variant = "crane",
+  // A grounded object sits on the floor instead of hanging from a string —
+  // no string/anchor line, and idle motion drops the pendulum swing/sway
+  // (which only makes sense for something actually hanging) for a small
+  // resting bob.
+  grounded = false,
+  scale = 1.24,
 }) {
   const groupRef = useRef(null);
   const innerGroupRef = useRef(null);
@@ -72,7 +101,28 @@ export function Crane3D({
     [hexColor]
   );
 
+  const airplaneGeom = useMemo(() => (variant === "airplane" ? buildAirplaneGeometry() : null), [variant]);
+
   const clonedScene = useMemo(() => {
+    if (airplaneGeom) {
+      const mesh = new THREE.Mesh(
+        airplaneGeom,
+        new THREE.MeshStandardMaterial({
+          color: hexColor,
+          roughness: 1.0,
+          metalness: 0.0,
+          bumpMap: paperTexture,
+          bumpScale: 0.015,
+          side: THREE.DoubleSide,
+        })
+      );
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      const group = new THREE.Group();
+      group.add(mesh);
+      return group;
+    }
+
     const cloned = scene.clone();
     cloned.traverse((node) => {
       if (node.isMesh) {
@@ -95,7 +145,7 @@ export function Crane3D({
       }
     });
     return cloned;
-  }, [scene, hexColor, paperTexture]);
+  }, [scene, hexColor, paperTexture, airplaneGeom]);
 
   const isHovered = interactionState === "hovered";
   const isPressed = interactionState === "pressed";
@@ -166,12 +216,15 @@ export function Crane3D({
       const t = localTimeRef.current;
       const offset = position[0] * 2.5;
 
-      const targetBob = isHovered ? 0.3 : Math.sin(t * 1.2 + offset) * 0.08;
-      const targetSwingX = Math.sin(t * 0.5 + offset) * 0.15;
-      const targetSwingZ = Math.cos(t * 0.4 + offset) * 0.1;
-      const targetRotY = Math.sin(t * 0.3 + offset) * 0.8;
-      const targetRotZ = Math.sin(t * 0.9 + offset) * 0.04 - targetSwingX * 0.2;
-      const targetRotX = targetSwingZ * 0.2;
+      // Grounded objects sit on a surface, not a string — the pendulum
+      // swing/sway below only reads as natural for something hanging, so
+      // this drops to a small resting bob and nothing else.
+      const targetBob = isHovered ? 0.15 : grounded ? Math.sin(t * 1.2 + offset) * 0.02 : Math.sin(t * 1.2 + offset) * 0.08;
+      const targetSwingX = grounded ? 0 : Math.sin(t * 0.5 + offset) * 0.15;
+      const targetSwingZ = grounded ? 0 : Math.cos(t * 0.4 + offset) * 0.1;
+      const targetRotY = grounded ? 0 : Math.sin(t * 0.3 + offset) * 0.8;
+      const targetRotZ = grounded ? 0 : Math.sin(t * 0.9 + offset) * 0.04 - targetSwingX * 0.2;
+      const targetRotX = grounded ? 0 : targetSwingZ * 0.2;
 
       const lerpFactor = 0.05;
       const liftLerpFactor = 0.1;
@@ -205,13 +258,14 @@ export function Crane3D({
     }
 
     // String rendered fresh every frame, mathematically anchored to a fixed
-    // world point above — stays taut through every bob/swing/press.
+    // world point above — stays taut through every bob/swing/press. Skipped
+    // entirely for a grounded object (nothing to hang from).
     if (stringRef.current && anchorRef.current) {
       anchorRef.current.updateWorldMatrix(true, false);
 
-      // Crane is wrapped in a scale={[1.24, 1.24, 1.24]} group, so its
-      // actual resting position in world space is position * 1.24.
-      const topAnchorWorld = new THREE.Vector3(position[0] * 1.24, 12, position[2] * 1.24);
+      // Crane is wrapped in a scale={[scale, scale, scale]} group, so its
+      // actual resting position in world space is position * scale.
+      const topAnchorWorld = new THREE.Vector3(position[0] * scale, 12, position[2] * scale);
       const topAnchorLocal = anchorRef.current.worldToLocal(topAnchorWorld);
 
       const positions = stringRef.current.geometry.attributes.position.array;
@@ -253,8 +307,14 @@ export function Crane3D({
   const { theme } = useAppContext();
   const isDark = theme === "dark";
 
+  // The GLTF crane model needs its own rotation/scale correction to sit
+  // right within innerGroup; the procedural airplane is already built
+  // nose-forward at a reasonable size, so it doesn't.
+  const modelRotation = variant === "airplane" ? [0, 0, 0] : [0, Math.PI / 4, 0];
+  const modelScale = variant === "airplane" ? [0.55, 0.55, 0.55] : [0.8, 0.8, 0.8];
+
   return (
-    <group scale={[1.24, 1.24, 1.24]}>
+    <group scale={[scale, scale, scale]}>
       {/* Static hitbox for stable interactions, decoupled from the crane's
           own constantly-swinging/bobbing transform. */}
       <mesh
@@ -277,26 +337,28 @@ export function Crane3D({
         rotation-z={springRotZ.to((z) => initialRotation[2] + z)}
       >
         <group ref={innerGroupRef}>
-          <group position={[0, -0.3, 0]} rotation={[0, Math.PI / 4, 0]} scale={[0.8, 0.8, 0.8]}>
+          <group position={[0, -0.3, 0]} rotation={modelRotation} scale={modelScale}>
             <primitive object={clonedScene} />
           </group>
-          <object3D ref={anchorRef} position={[0, 0.1, 0]}>
-            <line ref={stringRef}>
-              <bufferGeometry>
-                <bufferAttribute
-                  attach="attributes-position"
-                  count={2}
-                  array={new Float32Array(6)}
-                  itemSize={3}
+          {!grounded && (
+            <object3D ref={anchorRef} position={[0, 0.1, 0]}>
+              <line ref={stringRef}>
+                <bufferGeometry>
+                  <bufferAttribute
+                    attach="attributes-position"
+                    count={2}
+                    array={new Float32Array(6)}
+                    itemSize={3}
+                  />
+                </bufferGeometry>
+                <lineBasicMaterial
+                  color={isDark ? "#4b5563" : "#9ca3af"}
+                  transparent
+                  opacity={isDark ? 0.3 : 0.4}
                 />
-              </bufferGeometry>
-              <lineBasicMaterial
-                color={isDark ? "#4b5563" : "#9ca3af"}
-                transparent
-                opacity={isDark ? 0.3 : 0.4}
-              />
-            </line>
-          </object3D>
+              </line>
+            </object3D>
+          )}
         </group>
 
         <Html position={[0, -1.0, 0]} center zIndexRange={[100, 0]} style={{ pointerEvents: "none" }}>

@@ -1,4 +1,4 @@
-import { Routes, Route, Link, useLocation, useNavigate } from "react-router-dom";
+import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import * as THREE from "three";
@@ -13,15 +13,17 @@ import { Home } from "./pages/Home";
 import { About } from "./pages/About";
 import { Projects } from "./pages/Projects";
 import { Publications } from "./pages/Publications";
+import { SimplePage } from "./pages/SimplePage";
 import { Contact } from "./pages/Contact";
 import { LabsIndex } from "./pages/labs/LabsIndex";
 import { LabsPost } from "./pages/labs/LabsPost";
 
-// Routes that get the kami paper-fold transition instead of a plain fade —
-// matches the reference's own split (kami for the more editorial
-// destinations, plain fade for lists). Both directions (crane click in, Back
-// button out) use it; navigating within Labs (feed <-> a post) doesn't.
-const KAMI_ROUTES = new Set(["/about", "/labs"]);
+// Shelved, not deleted: KamiTransition/triggerKami/TransitionProvider below
+// are all still fully wired up, just unreachable with this set empty — every
+// route now gets the plain fade. Re-enable a route by adding it back here
+// (kami's own accompanying pages' Back buttons would also need switching
+// back from a plain navigate() to triggerKami() — see About.jsx/LabsIndex.jsx).
+const KAMI_ROUTES = new Set([]);
 // How long the OTHER cranes get to visibly react (their own exit animation)
 // before the snapshot is taken and we navigate — shorter than the plain
 // fade's NAVIGATE_DELAY_MS since the fold itself is the main event here.
@@ -33,48 +35,6 @@ const KAMI_LEAD_MS = 180;
 // that — this just needs to outlast the "it flew away" read, not the whole
 // spring.
 const NAVIGATE_DELAY_MS = 550;
-
-// Home's only navigation is 3D-canvas clicks — invisible to a keyboard,
-// screen reader, or anything crawling the site without driving a mouse into
-// a WebGL canvas. This is the real, always-in-the-DOM way through the site;
-// plain instant navigation on purpose, it's not meant to compete with the
-// cranes as the primary interaction.
-const NAV_LINKS = [
-  { to: "/", label: "Home" },
-  { to: "/about", label: "About" },
-  { to: "/projects", label: "Projects" },
-  { to: "/publications", label: "Publications" },
-  { to: "/labs", label: "Labs" },
-  { to: "/contact", label: "Contact" },
-];
-
-function SiteNav() {
-  const location = useLocation();
-  return (
-    <nav
-      aria-label="Primary"
-      className="fixed top-6 left-6 sm:left-8 z-40 flex gap-3 sm:gap-4 text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400"
-    >
-      {NAV_LINKS.map(({ to, label }) => {
-        const isCurrent = location.pathname === to;
-        return (
-          <Link
-            key={to}
-            to={to}
-            aria-current={isCurrent ? "page" : undefined}
-            className={
-              isCurrent
-                ? "text-slate-900 dark:text-slate-100"
-                : "hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
-            }
-          >
-            {label}
-          </Link>
-        );
-      })}
-    </nav>
-  );
-}
 
 function AppContent() {
   const location = useLocation();
@@ -148,7 +108,6 @@ function AppContent() {
     <div className="relative min-h-screen">
       <Scene3D visible={isHome} leavingPage={leavingPage} onCraneClick={handleCraneClick} />
 
-      <SiteNav />
       <ThemeToggle simple={!isHome} />
       <ThemeTransition />
 
@@ -170,6 +129,7 @@ function AppContent() {
                 <Route path="/" element={<Home />} />
                 <Route path="/projects" element={<Projects />} />
                 <Route path="/publications" element={<Publications />} />
+                <Route path="/simple" element={<SimplePage />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/labs" element={<LabsIndex />} />
