@@ -15,7 +15,7 @@ const NAV = [
 
 // A plain, single-scroll alternative to the 3D site — GitHub-Pages-style:
 // no cards, no motion, just typography and thin rules between sections.
-// Triggered by the grounded "Simple Website" crane on Home (see Scene3D).
+// Triggered by the "Simple Version" text button on Home (see App.jsx).
 export function SimplePage() {
   const navigate = useNavigate();
   useDocumentMeta("Matthew Lee", "A simple, single-page portfolio for Matthew Lee.");

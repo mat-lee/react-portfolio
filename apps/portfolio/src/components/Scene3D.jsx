@@ -215,34 +215,11 @@ export function Scene3D({ visible, leavingPage, onCraneClick }) {
             visible={visible}
             onClick={(pos) => onCraneClick("/about", pos)}
           />
-          {/* Both of these sit on the floor instead of hanging (no string) —
-              a distinct, plain pair of alternatives (a real destination and
-              the "simple mode" trigger) bookending the hanging cranes. */}
-          <Crane3D
-            position={[-3.4, -0.1, 0.8]}
-            initialRotation={[0, 0.4, 0]}
-            color="#94a3b8"
-            label="Simple Website"
-            grounded
-            scale={0.7}
-            delay={0.52}
-            isLeaving={leavingPage !== null}
-            visible={visible}
-            onClick={(pos) => onCraneClick("/simple", pos)}
-          />
-          <Crane3D
-            position={[3.4, -0.1, 0.8]}
-            initialRotation={[0, -0.4, 0]}
-            color="#94a3b8"
-            label="Contact"
-            variant="airplane"
-            grounded
-            scale={0.75}
-            delay={0.56}
-            isLeaving={leavingPage !== null}
-            visible={visible}
-            onClick={(pos) => onCraneClick("/contact", pos)}
-          />
+          {/* Simple Version and Contact used to be grounded 3D objects here
+              (a crane + a procedural paper airplane) — shelved for now in
+              favor of plain clickable text (see App.jsx's corner buttons);
+              Crane3D's `grounded`/`variant`/`scale` props stay available to
+              revive that idea later. */}
         </group>
         </Suspense>
       </Canvas>

@@ -156,6 +156,26 @@ function AppContent() {
           Crane model by JuanG3D (CC Attribution)
         </a>
       )}
+
+      {/* Simple Version and Contact used to be their own grounded 3D objects
+          (see Scene3D) — shelved for now in favor of plain clickable text,
+          smaller and pushed to the sides rather than sitting in the scene. */}
+      {isHome && (
+        <button
+          onClick={(e) => handleCraneClick("/simple", { x: e.clientX, y: e.clientY })}
+          className="fixed bottom-14 left-6 z-40 text-[11px] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
+        >
+          Simple Version
+        </button>
+      )}
+      {isHome && (
+        <button
+          onClick={(e) => handleCraneClick("/contact", { x: e.clientX, y: e.clientY })}
+          className="fixed bottom-14 right-6 z-40 text-[11px] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
+        >
+          Contact
+        </button>
+      )}
     </div>
   );
 }
