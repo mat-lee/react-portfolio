@@ -13,12 +13,15 @@ import { useAppContext } from "../AppContext";
 // model gets applied to it below, so it reads as part of the same family.
 function buildAirplaneGeometry() {
   const v = new Float32Array([
-    // left wing: nose -> ridge -> wingtip, nose -> wingtip -> tail corner
-    0, 0.05, 1.6, 0, 0.3, -1.2, -1.5, -0.3, -0.7,
-    0, 0.05, 1.6, -1.5, -0.3, -0.7, -0.35, -0.05, -1.5,
+    // left wing: nose -> ridge -> wingtip, nose -> wingtip -> tail corner.
+    // A deep dihedral fold (ridge well above, wingtips well below the
+    // nose/tail line) so the shape still reads as folded 3D from a
+    // near-top-down view, not just a flat triangle.
+    0, 0.1, 1.6, 0, 0.6, -1.2, -1.5, -0.6, -0.7,
+    0, 0.1, 1.6, -1.5, -0.6, -0.7, -0.35, -0.1, -1.5,
     // right wing (mirrored)
-    0, 0.05, 1.6, 1.5, -0.3, -0.7, 0, 0.3, -1.2,
-    0, 0.05, 1.6, 0.35, -0.05, -1.5, 1.5, -0.3, -0.7,
+    0, 0.1, 1.6, 1.5, -0.6, -0.7, 0, 0.6, -1.2,
+    0, 0.1, 1.6, 0.35, -0.1, -1.5, 1.5, -0.6, -0.7,
   ]);
   const geo = new THREE.BufferGeometry();
   geo.setAttribute("position", new THREE.BufferAttribute(v, 3));
@@ -311,7 +314,7 @@ export function Crane3D({
   // right within innerGroup; the procedural airplane is already built
   // nose-forward at a reasonable size, so it doesn't.
   const modelRotation = variant === "airplane" ? [0, 0, 0] : [0, Math.PI / 4, 0];
-  const modelScale = variant === "airplane" ? [0.55, 0.55, 0.55] : [0.8, 0.8, 0.8];
+  const modelScale = variant === "airplane" ? [0.4, 0.4, 0.4] : [0.8, 0.8, 0.8];
 
   return (
     <group scale={[scale, scale, scale]}>

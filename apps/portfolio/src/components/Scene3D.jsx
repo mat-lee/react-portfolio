@@ -65,7 +65,30 @@ function Particles({ isDark }) {
   );
 }
 
+// A repeating dot-grid tile, drawn once onto a small canvas — cheap way to
+// give the floor plane a visible surface instead of pure flat color, now
+// that two grounded cranes actually rest on it.
+function useGroundDotsTexture(isDark) {
+  return useMemo(() => {
+    const size = 64;
+    const canvas = document.createElement("canvas");
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = isDark ? "rgba(255,255,255,0.55)" : "rgba(15,23,42,0.35)";
+    ctx.beginPath();
+    ctx.arc(size / 2, size / 2, 2.4, 0, Math.PI * 2);
+    ctx.fill();
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(70, 70); // ~1.4 world-unit spacing across the 100x100 floor
+    return tex;
+  }, [isDark]);
+}
+
 function SceneLightingAndFloor({ isDark }) {
+  const dotsTexture = useGroundDotsTexture(isDark);
   const spring = useSpring({
     ambientIntensity: isDark ? 0.2 : 0.7,
     hemiIntensity: isDark ? 0.4 : 0.8,
@@ -104,6 +127,11 @@ function SceneLightingAndFloor({ isDark }) {
       <mesh position={[0, -0.5, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[100, 100]} />
         <animated.shadowMaterial transparent opacity={spring.shadowOpacity} />
+      </mesh>
+      {/* Just above the shadow plane to avoid z-fighting. */}
+      <mesh position={[0, -0.495, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[100, 100]} />
+        <meshBasicMaterial map={dotsTexture} transparent opacity={0.5} depthWrite={false} />
       </mesh>
     </>
   );
@@ -165,7 +193,7 @@ export function Scene3D({ visible, leavingPage, onCraneClick }) {
           <Crane3D
             position={[0, 1.5, -1.0]}
             initialRotation={[0, 0.6, 0.02]}
-            color="#8b5cf6"
+            color="#3b82f6"
             label="Labs"
             delay={0.44}
             isLeaving={leavingPage !== null}
@@ -182,31 +210,33 @@ export function Scene3D({ visible, leavingPage, onCraneClick }) {
             visible={visible}
             onClick={(pos) => onCraneClick("/about", pos)}
           />
+          {/* Both of these sit on the floor instead of hanging (no string) —
+              a distinct, plain pair of alternatives (a real destination and
+              the "simple mode" trigger) bookending the hanging cranes. */}
           <Crane3D
-            position={[3.7, 1.6, -1.5]}
-            initialRotation={[0, -1.0, 0.03]}
-            color="#3b82f6"
-            label="Contact"
-            variant="airplane"
-            delay={0.52}
-            isLeaving={leavingPage !== null}
-            visible={visible}
-            onClick={(pos) => onCraneClick("/contact", pos)}
-          />
-          {/* Sits on the floor instead of hanging, and smaller than the rest
-              — a distinct, plain alternative to the 3D site itself, not
-              another destination alongside it. */}
-          <Crane3D
-            position={[0, -0.1, 0.8]}
+            position={[-3.4, -0.1, 0.8]}
             initialRotation={[0, 0.4, 0]}
             color="#94a3b8"
             label="Simple Website"
             grounded
             scale={0.7}
-            delay={0.56}
+            delay={0.52}
             isLeaving={leavingPage !== null}
             visible={visible}
             onClick={(pos) => onCraneClick("/simple", pos)}
+          />
+          <Crane3D
+            position={[3.4, -0.1, 0.8]}
+            initialRotation={[0, -0.4, 0]}
+            color="#94a3b8"
+            label="Contact"
+            variant="airplane"
+            grounded
+            scale={0.75}
+            delay={0.56}
+            isLeaving={leavingPage !== null}
+            visible={visible}
+            onClick={(pos) => onCraneClick("/contact", pos)}
           />
         </group>
         </Suspense>
