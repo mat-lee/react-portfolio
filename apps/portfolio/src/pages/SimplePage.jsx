@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import { useDocumentMeta } from "../lib/useDocumentMeta";
 import { CONTACT_LINKS } from "./Contact";
 import projectsData from "../data/projects.json";
@@ -18,7 +17,6 @@ const NAV = [
 // no cards, no motion, just typography and thin rules between sections.
 // Triggered by the "Simple Version" text button on Home (see App.jsx).
 export function SimplePage() {
-  const navigate = useNavigate();
   useDocumentMeta("Matthew Lee", "A simple, single-page portfolio for Matthew Lee.");
 
   return (
@@ -154,12 +152,6 @@ export function SimplePage() {
             ))}
           </ul>
         </section>
-
-        <footer className="pt-6 border-t border-slate-200 dark:border-slate-800 text-[13px] text-slate-400 dark:text-slate-500">
-          <button onClick={() => navigate("/")} className="hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
-            ← Back to the interactive site
-          </button>
-        </footer>
       </div>
     </div>
   );

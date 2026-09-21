@@ -7,7 +7,7 @@ import { useRef, useEffect } from "react";
 // About/Projects/Contact are plain content pages, not the crane mobile — the
 // dangling hand-physics string reads as out of place there, so those pages
 // get plain fixed icon buttons instead (see the early return below).
-export function ThemeToggle({ simple = false }) {
+export function ThemeToggle({ simple = false, leading = null }) {
   const { theme, setTheme, soundEnabled, setSoundEnabled, isTransitioningTheme } = useAppContext();
 
   const ref1 = useRef(null);
@@ -182,6 +182,7 @@ export function ThemeToggle({ simple = false }) {
     // isDark-driven — these buttons sit on a different surface than Home's.
     return (
       <div className="fixed top-6 right-12 sm:right-24 flex gap-3 z-50">
+        {leading}
         <button
           onClick={() => {
             audio.playTug();

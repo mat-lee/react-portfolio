@@ -14,7 +14,8 @@ import { About } from "./pages/About";
 import { Projects } from "./pages/Projects";
 import { Publications } from "./pages/Publications";
 import { SimplePage } from "./pages/SimplePage";
-import { Contact } from "./pages/Contact";
+import { Contact, CONTACT_LINKS } from "./pages/Contact";
+import { ArrowLeft } from "lucide-react";
 import { LabsIndex } from "./pages/labs/LabsIndex";
 import { LabsPost } from "./pages/labs/LabsPost";
 
@@ -50,6 +51,12 @@ function AppContent() {
   // mounted regardless (see its own comment) — this only toggles its
   // visibility/frameloop.
   const [kami, setKami] = useState(null);
+  // Whether the inline contact card (below the "Contact" text button) is
+  // open — replaces navigating to /contact for that one entry point.
+  const [showContactCard, setShowContactCard] = useState(false);
+  useEffect(() => {
+    if (!isHome) setShowContactCard(false);
+  }, [isHome]);
 
   const triggerKami = async (route, clickPos) => {
     if (leavingPage || kami) return;
@@ -108,7 +115,20 @@ function AppContent() {
     <div className="relative min-h-screen">
       <Scene3D visible={isHome} leavingPage={leavingPage} onCraneClick={handleCraneClick} />
 
-      <ThemeToggle simple={!isHome} />
+      <ThemeToggle
+        simple={!isHome}
+        leading={
+          location.pathname === "/simple" && (
+            <button
+              onClick={() => navigate("/")}
+              className="w-10 h-10 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:scale-110 transition-all"
+              aria-label="Back to the interactive site"
+            >
+              <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
+            </button>
+          )
+        }
+      />
       <ThemeTransition />
 
       <TransitionProvider triggerKami={triggerKami}>
@@ -122,7 +142,10 @@ function AppContent() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
+              // The simple page appears/disappears instantly, no fade — it's
+              // meant to read as an immediate plain alternative, not another
+              // animated destination.
+              transition={{ duration: location.pathname === "/simple" ? 0 : 0.25 }}
               className={isHome ? "pointer-events-none w-full h-full" : "pointer-events-auto w-full h-full"}
             >
               <Routes location={location}>
@@ -161,20 +184,39 @@ function AppContent() {
           (see Scene3D) — shelved for now in favor of plain clickable text,
           smaller and pushed to the sides rather than sitting in the scene. */}
       {isHome && (
+        // Instant, no fly-away/fade — this isn't a crane, and the simple
+        // page is meant to feel like flipping a switch, not a transition.
         <button
-          onClick={(e) => handleCraneClick("/simple", { x: e.clientX, y: e.clientY })}
+          onClick={() => navigate("/simple")}
           className="fixed bottom-14 left-6 z-40 text-[11px] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
         >
           Simple Version
         </button>
       )}
       {isHome && (
-        <button
-          onClick={(e) => handleCraneClick("/contact", { x: e.clientX, y: e.clientY })}
-          className="fixed bottom-14 right-6 z-40 text-[11px] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
-        >
-          Contact
-        </button>
+        <div className="fixed bottom-14 right-6 z-40 flex flex-col items-end gap-2">
+          {showContactCard && (
+            <div className="flex flex-col items-end gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+              {CONTACT_LINKS.map(({ href, text, external }) => (
+                <a
+                  key={href}
+                  href={href}
+                  target={external ? "_blank" : undefined}
+                  rel={external ? "noreferrer" : undefined}
+                  className="hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
+                >
+                  {text}
+                </a>
+              ))}
+            </div>
+          )}
+          <button
+            onClick={() => setShowContactCard((v) => !v)}
+            className="text-[11px] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
+          >
+            Contact
+          </button>
+        </div>
       )}
     </div>
   );
