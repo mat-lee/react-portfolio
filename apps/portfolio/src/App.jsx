@@ -115,21 +115,17 @@ function AppContent() {
     <div className="relative min-h-screen">
       <Scene3D visible={isHome} leavingPage={leavingPage} onCraneClick={handleCraneClick} />
 
-      <ThemeToggle
-        simple={!isHome}
-        leading={
-          location.pathname === "/simple" && (
-            <button
-              onClick={() => navigate("/")}
-              className="w-10 h-10 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:scale-110 transition-all"
-              aria-label="Back to the interactive site"
-            >
-              <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
-            </button>
-          )
-        }
-      />
+      <ThemeToggle simple={!isHome} />
       <ThemeTransition />
+
+      {location.pathname === "/simple" && (
+        <button
+          onClick={() => navigate("/")}
+          className="fixed top-6 left-6 z-50 flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" strokeWidth={1.5} /> Back
+        </button>
+      )}
 
       <TransitionProvider triggerKami={triggerKami}>
         <main className="relative z-10 w-full min-h-screen pointer-events-none">
