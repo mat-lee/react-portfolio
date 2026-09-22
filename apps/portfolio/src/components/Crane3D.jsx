@@ -98,6 +98,17 @@ export function Crane3D({
   // indirection needed for a fixed, small set of cranes.
   const hexColor = color;
 
+  // A deterministic per-crane pitch "voice" hashed from its own color —
+  // each crane consistently sounds a little different from the others,
+  // instead of every crane playing the exact same fixed SFX (audio.js adds
+  // its own small per-call jitter on top, so even one crane doesn't sound
+  // identical every time either).
+  const cranePitch = useMemo(() => {
+    let h = 0;
+    for (let i = 0; i < hexColor.length; i++) h = (h * 31 + hexColor.charCodeAt(i)) >>> 0;
+    return 0.85 + ((h % 1000) / 1000) * 0.3; // 0.85 - 1.15
+  }, [hexColor]);
+
   const baseColorObj = useMemo(() => new THREE.Color(hexColor), [hexColor]);
   const hoverColorObj = useMemo(
     () => new THREE.Color(hexColor).lerp(new THREE.Color("#ffffff"), 0.25),
@@ -173,7 +184,7 @@ export function Crane3D({
     if (interactionState !== "idle") return;
     setInteractionState("hovered");
     document.body.style.cursor = "pointer";
-    audio.playShimmer();
+    audio.playShimmer(cranePitch);
   };
 
   const handlePointerOut = (e) => {
@@ -188,7 +199,7 @@ export function Crane3D({
     e.stopPropagation();
     if (interactionState === "releasing" || interactionState === "exiting" || isLeaving) return;
     setInteractionState("pressed");
-    audio.playTug();
+    audio.playTug(cranePitch);
   };
 
   const handlePointerUp = (e) => {
@@ -197,7 +208,7 @@ export function Crane3D({
     isClickedCrane.current = true;
     setInteractionState("releasing");
     document.body.style.cursor = "auto";
-    audio.playFly();
+    audio.playFly(cranePitch);
     onClick({ x: e.clientX, y: e.clientY });
   };
 
@@ -288,7 +299,7 @@ export function Crane3D({
       const timeoutId = setTimeout(() => {
         leavingTriggered.current = true;
         setInteractionState("exiting");
-        audio.playFly();
+        audio.playFly(cranePitch);
       }, delay * 1000);
       return () => clearTimeout(timeoutId);
     } else if (!isLeaving) {
@@ -298,7 +309,7 @@ export function Crane3D({
       isInitialized.current = false;
       localTimeRef.current = 0;
     }
-  }, [isLeaving, delay]);
+  }, [isLeaving, delay, cranePitch]);
 
   // Plays the one-shot drop-in spring exactly when the scene is about to be
   // shown. useLayoutEffect (not useEffect) so `reset` is already true before

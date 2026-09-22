@@ -18,10 +18,17 @@ export class AudioSystem {
     this.enabled = enabled;
   }
 
-  playShimmer() {
+  // `pitch` (default 1) scales the base frequencies — Crane3D passes each
+  // crane its own fixed pitch (derived from its color) so different cranes
+  // consistently sound a little different, not just the same fixed SFX
+  // played back identically every time. On top of that, every call also
+  // gets a small random jitter of its own, so even the SAME crane doesn't
+  // sound exactly identical twice.
+  playShimmer(pitch = 1) {
     if (!this.enabled) return;
     this.init();
     if (!this.context) return;
+    const p = pitch * (0.97 + Math.random() * 0.06);
 
     // High-pitched crystalline paper shimmer
     const ctx = this.context;
@@ -29,8 +36,8 @@ export class AudioSystem {
     const gain = ctx.createGain();
 
     osc.type = "sine";
-    osc.frequency.setValueAtTime(2000, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(4000, ctx.currentTime + 0.1);
+    osc.frequency.setValueAtTime(2000 * p, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(4000 * p, ctx.currentTime + 0.1);
 
     gain.gain.setValueAtTime(0, ctx.currentTime);
     gain.gain.linearRampToValueAtTime(0.02, ctx.currentTime + 0.02);
@@ -43,10 +50,11 @@ export class AudioSystem {
     osc.stop(ctx.currentTime + 0.2);
   }
 
-  playTug() {
+  playTug(pitch = 1) {
     if (!this.enabled) return;
     this.init();
     if (!this.context) return;
+    const p = pitch * (0.97 + Math.random() * 0.06);
 
     // String tension / paper creak
     const ctx = this.context;
@@ -54,8 +62,8 @@ export class AudioSystem {
     const gain = ctx.createGain();
 
     osc.type = "sawtooth";
-    osc.frequency.setValueAtTime(100, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.1);
+    osc.frequency.setValueAtTime(100 * p, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(40 * p, ctx.currentTime + 0.1);
 
     gain.gain.setValueAtTime(0, ctx.currentTime);
     gain.gain.linearRampToValueAtTime(0.05, ctx.currentTime + 0.02);
@@ -63,7 +71,7 @@ export class AudioSystem {
 
     const filter = ctx.createBiquadFilter();
     filter.type = "lowpass";
-    filter.frequency.value = 500;
+    filter.frequency.value = 500 * p;
 
     osc.connect(filter);
     filter.connect(gain);
@@ -73,10 +81,11 @@ export class AudioSystem {
     osc.stop(ctx.currentTime + 0.15);
   }
 
-  playFly() {
+  playFly(pitch = 1) {
     if (!this.enabled) return;
     this.init();
     if (!this.context) return;
+    const p = pitch * (0.97 + Math.random() * 0.06);
 
     // Airy paper swoosh
     const ctx = this.context;
@@ -92,8 +101,8 @@ export class AudioSystem {
 
     const filter = ctx.createBiquadFilter();
     filter.type = "bandpass";
-    filter.frequency.setValueAtTime(800, ctx.currentTime);
-    filter.frequency.exponentialRampToValueAtTime(4000, ctx.currentTime + 0.4);
+    filter.frequency.setValueAtTime(800 * p, ctx.currentTime);
+    filter.frequency.exponentialRampToValueAtTime(4000 * p, ctx.currentTime + 0.4);
     filter.Q.value = 0.5;
 
     const gain = ctx.createGain();
