@@ -47,7 +47,7 @@ export function LabsIndex() {
   return (
     <div className="w-full min-h-screen bg-[#FBFBF9] dark:bg-[#020617] text-slate-900 dark:text-slate-100 px-6 py-16 md:py-24">
       <motion.div
-        className="max-w-2xl mx-auto"
+        className="max-w-3xl mx-auto"
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -81,29 +81,63 @@ export function LabsIndex() {
                   )}
                 </div>
                 <p className="text-slate-600 dark:text-slate-400 mt-1">{item.post.frontmatter.description}</p>
+                {item.post.frontmatter.tags?.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2.5">
+                    {item.post.frontmatter.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="inline-flex items-center px-2.5 py-1 rounded-full border border-slate-300 dark:border-slate-700 text-xs font-medium text-slate-600 dark:text-slate-400"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </li>
             ) : (
               <li key={item.group.title}>
                 <div className="text-sm text-slate-500 dark:text-slate-400">{formatDate(item.date)}</div>
-                <h2 className="text-xl font-semibold mt-1">{item.group.title}</h2>
-                <p className="text-slate-600 dark:text-slate-400 mt-1 mb-3">{item.group.description}</p>
-                <ul className="space-y-2 border-l border-slate-200 dark:border-slate-800 pl-4">
+                <div className="flex items-baseline gap-2 mt-1">
+                  <h2 className="text-xl font-semibold">{item.group.title}</h2>
+                  <span className="text-sm text-slate-400 dark:text-slate-500">
+                    {item.children.length} {item.children.length === 1 ? "post" : "posts"}
+                  </span>
+                </div>
+                <p className="text-slate-600 dark:text-slate-400 mt-1 mb-6 max-w-xl">{item.group.description}</p>
+                <ul className="space-y-7 border-l border-slate-200 dark:border-slate-800 pl-6">
                   {item.children.map((child) => (
                     <li key={child.id}>
-                      <Link
-                        to={`/labs/${child.id}`}
-                        className="font-medium hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
-                      >
-                        {child.frontmatter.title}
-                      </Link>
-                      {child.frontmatter.kind && (
-                        <span className="text-[11px] uppercase tracking-wide text-slate-400 dark:text-slate-500 ml-2">
-                          {child.frontmatter.kind}
-                        </span>
-                      )}
-                      <span className="text-sm text-slate-500 dark:text-slate-400 ml-2">
+                      <div className="flex items-baseline gap-2">
+                        <Link
+                          to={`/labs/${child.id}`}
+                          className="text-lg font-semibold hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                        >
+                          {child.frontmatter.title}
+                        </Link>
+                        {child.frontmatter.kind && (
+                          <span className="text-[11px] uppercase tracking-wide text-slate-400 dark:text-slate-500">
+                            {child.frontmatter.kind}
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
                         {formatDate(new Date(child.frontmatter.date))}
-                      </span>
+                      </div>
+                      {child.frontmatter.description && (
+                        <p className="text-slate-600 dark:text-slate-400 mt-1.5">{child.frontmatter.description}</p>
+                      )}
+                      {child.frontmatter.tags?.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-2.5">
+                          {child.frontmatter.tags.map((tag) => (
+                            <span
+                              key={tag}
+                              className="inline-flex items-center px-2.5 py-1 rounded-full border border-slate-300 dark:border-slate-700 text-xs font-medium text-slate-600 dark:text-slate-400"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </li>
                   ))}
                 </ul>

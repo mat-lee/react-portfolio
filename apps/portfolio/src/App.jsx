@@ -192,16 +192,18 @@ function AppContent() {
       {isHome && (
         <div className="fixed bottom-14 right-6 z-40 flex flex-col items-end gap-2">
           {showContactCard && (
-            <div className="flex flex-col items-end gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
-              {CONTACT_LINKS.map(({ href, text, external }) => (
+            <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400">
+              {CONTACT_LINKS.map(({ href, icon: Icon, text, external }) => (
                 <a
                   key={href}
                   href={href}
                   target={external ? "_blank" : undefined}
                   rel={external ? "noreferrer" : undefined}
-                  className="hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
+                  aria-label={text}
+                  title={text}
+                  className="hover:text-slate-900 dark:hover:text-slate-100 hover:scale-110 transition-all"
                 >
-                  {text}
+                  <Icon className="w-4 h-4" strokeWidth={1.5} />
                 </a>
               ))}
             </div>

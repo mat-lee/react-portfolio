@@ -62,17 +62,18 @@ export function About() {
 
         {/* A copy of the Contact page's own links, so a visitor reading
             About doesn't have to leave the page to find them. */}
-        <div className="pt-8 mt-8 border-t border-slate-200 dark:border-slate-800 space-y-4">
+        <div className="flex items-center gap-6 pt-8 mt-8 border-t border-slate-200 dark:border-slate-800">
           {CONTACT_LINKS.map(({ href, icon: Icon, text, external }) => (
             <a
               key={href}
               href={href}
               target={external ? "_blank" : undefined}
               rel={external ? "noreferrer" : undefined}
-              className="flex items-center gap-3 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
+              aria-label={text}
+              title={text}
+              className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:scale-110 transition-all"
             >
-              <Icon className="w-5 h-5" />
-              <span className="text-base">{text}</span>
+              <Icon className="w-7 h-7" strokeWidth={1.5} />
             </a>
           ))}
         </div>

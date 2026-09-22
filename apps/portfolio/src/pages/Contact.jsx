@@ -35,17 +35,20 @@ export function Contact() {
 
         <h1 className="text-3xl font-bold tracking-tight mb-8">Contact</h1>
 
-        <div className="space-y-4">
+        {/* Icon-only, not label + icon — text is still there for anyone who
+            needs it (aria-label, title tooltip), just not painted on screen. */}
+        <div className="flex items-center gap-6">
           {CONTACT_LINKS.map(({ href, icon: Icon, text, external }) => (
             <a
               key={href}
               href={href}
               target={external ? "_blank" : undefined}
               rel={external ? "noreferrer" : undefined}
-              className="flex items-center gap-3 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
+              aria-label={text}
+              title={text}
+              className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:scale-110 transition-all"
             >
-              <Icon className="w-5 h-5" />
-              <span className="text-base">{text}</span>
+              <Icon className="w-7 h-7" strokeWidth={1.5} />
             </a>
           ))}
         </div>
