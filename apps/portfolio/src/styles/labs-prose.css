@@ -94,6 +94,33 @@
   background: var(--labs-code-bg);
 }
 
+/* Chart PNGs/GIFs are baked-in white-background pixels — CSS can't actually
+   recolor that data (an invert() filter would work for plain line charts
+   but wrongs photos/gifs and any already-colored image, and there's no way
+   to tell them apart here), so this doesn't try. Instead, in dark mode
+   every image gets a light padded "card" so the white background reads as
+   an intentional frame instead of a jarring raw rectangle. */
+.labs-prose img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.5rem auto;
+  border-radius: 0.5rem;
+}
+.dark .labs-prose img {
+  background: #ffffff;
+  padding: 0.75rem;
+  border: 1px solid var(--labs-border);
+}
+/* The one .gif in these writeups is a screen recording of the game itself
+   (already dark), not a chart export — framing it in white would be the
+   wrong call, so opt it back out. */
+.dark .labs-prose img[src$=".gif"] {
+  background: none;
+  padding: 0;
+  border: none;
+}
+
 .labs-prose details {
   margin: 1.5rem 0;
   padding: 0.75rem 1rem;
