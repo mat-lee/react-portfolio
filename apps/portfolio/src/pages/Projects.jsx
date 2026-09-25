@@ -1,10 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, ExternalLink, Github, FlaskConical } from "lucide-react";
+import { ArrowLeft, ExternalLink, Github, FileText } from "lucide-react";
 import { Tetrahedron } from "../components/Tetrahedron";
 import { useDocumentMeta } from "../lib/useDocumentMeta";
 import projectsData from "../data/projects.json";
-import labsData from "../data/labs.json";
+import writeupsData from "../data/writeups.json";
 
 const ACCENTS = ["#ef4444", "#3b82f6", "#f59e0b", "#10b981"];
 
@@ -42,7 +42,7 @@ export function Projects() {
 
         <ul className="space-y-10">
           {projectsData.map((project, i) => {
-            const projectLabs = labsData.filter((lab) => project.labs?.includes(lab.id));
+            const projectWriteups = writeupsData.filter((writeup) => project.writeups?.includes(writeup.id));
             return (
               <motion.li
                 key={project.id}
@@ -94,15 +94,13 @@ export function Projects() {
                         {tag}
                       </span>
                     ))}
-                    {projectLabs.map((lab) => (
+                    {projectWriteups.map((writeup) => (
                       <a
-                        key={lab.id}
-                        href={lab.url}
-                        target="_blank"
-                        rel="noreferrer"
+                        key={writeup.id}
+                        href={writeup.url}
                         className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border border-slate-300 dark:border-slate-700 text-xs font-medium text-slate-600 dark:text-slate-400 hover:border-slate-400 dark:hover:border-slate-600 transition-colors"
                       >
-                        <FlaskConical className="w-3 h-3" /> {lab.title}
+                        <FileText className="w-3 h-3" /> {writeup.title}
                       </a>
                     ))}
                   </div>

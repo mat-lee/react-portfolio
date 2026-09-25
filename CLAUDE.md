@@ -7,12 +7,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Monorepo containing:
 - **Portfolio** (www.mat-lee.us) - React/Vite SPA. A persistent
   react-three-fiber origami-crane scene on Home; clicking a crane routes
-  (react-router) to About/Projects/Contact/Labs.
+  (react-router) to About/Projects/Contact/Writeups.
 - **Labs** (labs.mat-lee.us) - retired as a standalone site; now just a
-  static redirect shim to `mat-lee.us/labs/...` (see `apps/labs/README.md`).
-  The actual Labs writeups live inside the Portfolio app.
+  static redirect shim to `mat-lee.us/writeups/...` (see `apps/labs/README.md`).
+  The actual writeups live inside the Portfolio app.
 - **Demos** - Shared React components used by the Portfolio app (both the
-  Home scene's crane model rendering and Labs' interactive writeups).
+  Home scene's crane model rendering and the writeups' interactive demos).
 
 ## Commands
 
@@ -20,7 +20,7 @@ Monorepo containing:
 ```bash
 pnpm install                 # Install all workspace dependencies
 pnpm dev                     # Start all apps in parallel
-pnpm dev:portfolio           # Start portfolio (localhost:5173) — the whole site, Labs included
+pnpm dev:portfolio           # Start portfolio (localhost:5173) — the whole site, Writeups included
 ```
 
 ### Building
@@ -39,16 +39,16 @@ my-portfolio/
 │   │       ├── App.jsx              # routes + persistent Scene3D + theme toggle/transition
 │   │       ├── components/          # Scene3D, Crane3D, ThemeToggle, ThemeTransition, Callout
 │   │       ├── pages/                # Home, About, Projects, Contact
-│   │       │   └── labs/             # LabsIndex (feed), LabsPost (writeup renderer)
-│   │       ├── content/labs/<group>/<slug>.mdx  # the writeups, routed at /labs/<group>/<slug>
+│   │       │   └── writeups/         # WriteupsIndex (feed), WriteupsPost (writeup renderer)
+│   │       ├── content/writeups/<group>/<slug>.mdx  # the writeups, routed at /writeups/<group>/<slug>
 │   │       ├── data/
 │   │       │   ├── projects.json     # project cards on the Projects page
-│   │       │   ├── labs.json         # lab-note links shown on project cards
-│   │       │   └── labsGroups.js     # Labs group folder → title/description
+│   │       │   ├── writeups.json     # writeup links shown on project cards
+│   │       │   └── writeupsGroups.js # Writeups group folder → title/description
 │   │       ├── lib/
-│   │       │   ├── labsPosts.js      # import.meta.glob registry over content/labs (replaces Astro's content collections)
+│   │       │   ├── writeupsPosts.js  # import.meta.glob registry over content/writeups (replaces Astro's content collections)
 │   │       │   └── date.js
-│   │       └── styles/labs-prose.css # long-form writeup typography (Labs post page only)
+│   │       └── styles/writeups-prose.css # long-form writeup typography (Writeups post page only)
 │   └── labs/                # static redirect shim only — see apps/labs/README.md
 └── packages/
     └── demos/               # Shared React components
@@ -58,25 +58,25 @@ my-portfolio/
             └── TetrisMoveVisualizer/
 ```
 
-## Adding a New Lab
+## Adding a New Writeup
 
-1. **Create the page** at `apps/portfolio/src/content/labs/<group>/<slug>.mdx`.
-   It routes to `/labs/<group>/<slug>`.
+1. **Create the page** at `apps/portfolio/src/content/writeups/<group>/<slug>.mdx`.
+   It routes to `/writeups/<group>/<slug>`.
    ```mdx
    ---
-   title: My Lab
+   title: My Writeup
    date: 2026-08-13
-   description: One sentence, shown on the /labs feed.
+   description: One sentence, shown on the /writeups feed.
    tags: [optional]
    kind: Algorithm   # one-word/short-phrase label shown next to the title
    draft: false      # true excludes it from the feed/build
    ---
    ```
-2. **New group?** Add an entry to `apps/portfolio/src/data/labsGroups.js`
+2. **New group?** Add an entry to `apps/portfolio/src/data/writeupsGroups.js`
    keyed by the folder name. Posts in an undeclared folder render as
    standalone feed entries.
-3. **Add the link** to `apps/portfolio/src/data/labs.json` so it appears on
-   the matching project card too (separate from the feed listing).
+3. **Add the link** to `apps/portfolio/src/data/writeups.json` so it appears
+   on the matching project card too (separate from the feed listing).
 4. **Add the URL** to `apps/portfolio/public/sitemap.xml`.
 
 ### Adding an interactive demo

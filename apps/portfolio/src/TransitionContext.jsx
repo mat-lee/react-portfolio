@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 
-// Lets a page arbitrarily deep (About/Labs' own Back button) trigger the
+// Lets a page arbitrarily deep (About/Writeups' own Back button) trigger the
 // kami transition without prop-drilling it down from App.jsx, which owns
 // the overlay itself.
 const TransitionContext = createContext(undefined);

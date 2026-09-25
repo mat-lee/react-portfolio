@@ -1,7 +1,7 @@
 import { useDocumentMeta } from "../lib/useDocumentMeta";
 import { CONTACT_LINKS } from "./Contact";
 import projectsData from "../data/projects.json";
-import labsData from "../data/labs.json";
+import writeupsData from "../data/writeups.json";
 import publicationsData from "../data/publications.json";
 
 const SKILLS = ["Python", "PyTorch", "TensorFlow", "Pandas", "Scikit-learn", "Frontend", "Backend"];
@@ -9,7 +9,7 @@ const NAV = [
   { href: "#about", label: "About" },
   { href: "#projects", label: "Projects" },
   { href: "#publications", label: "Publications" },
-  { href: "#labs", label: "Labs" },
+  { href: "#writeups", label: "Writeups" },
   { href: "#contact", label: "Contact" },
 ];
 
@@ -23,7 +23,10 @@ export function SimplePage() {
     <div className="w-full min-h-screen bg-[#FBFBF9] dark:bg-[#020617] text-slate-900 dark:text-slate-100">
       <div className="max-w-2xl mx-auto px-6 py-16 md:py-20">
         <header className="mb-10">
-          <h1 className="text-[28px] font-bold tracking-tight mb-1.5">Matthew Lee</h1>
+          <div className="flex items-center gap-4 mb-1.5">
+            <img src="/headshot.jpg" alt="Matthew Lee" className="w-14 h-14 rounded-full object-cover shrink-0" />
+            <h1 className="text-[28px] font-bold tracking-tight">Matthew Lee</h1>
+          </div>
           <p className="text-slate-500 dark:text-slate-400 text-base mb-5">
             Computer Science &amp; Mathematics @ UNC Chapel Hill
           </p>
@@ -116,16 +119,16 @@ export function SimplePage() {
         </section>
         <hr className="border-t border-slate-200 dark:border-slate-800 mb-10" />
 
-        <section id="labs" className="mb-10">
+        <section id="writeups" className="mb-10">
           <h2 className="text-[13px] uppercase tracking-[0.08em] font-semibold text-slate-500 dark:text-slate-400 mb-4">
-            Labs
+            Writeups
           </h2>
           <p className="text-slate-500 dark:text-slate-400 text-[15px] mb-3.5">Explorations and technical writeups.</p>
           <ul className="list-none m-0 p-0 space-y-2.5 text-[15px]">
-            {labsData.map((lab) => (
-              <li key={lab.id}>
-                <a href={lab.url} target="_blank" rel="noreferrer" className="text-blue-700 dark:text-blue-400 hover:underline">
-                  {lab.title}
+            {writeupsData.map((writeup) => (
+              <li key={writeup.id}>
+                <a href={writeup.url} className="text-blue-700 dark:text-blue-400 hover:underline">
+                  {writeup.title}
                 </a>
               </li>
             ))}

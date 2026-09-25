@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Hand-maintained — only 3 published Labs posts exist, not worth a
-     build-time generator yet. Add a new <url> here whenever a new lab is
-     published (see CLAUDE.md's "Adding a New Lab"). -->
+<!-- Hand-maintained — only 3 published Writeups posts exist, not worth a
+     build-time generator yet. Add a new <url> here whenever a new writeup is
+     published (see CLAUDE.md's "Adding a New Writeup"). -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://mat-lee.us/</loc></url>
   <url><loc>https://mat-lee.us/about</loc></url>
@@ -9,8 +9,8 @@
   <url><loc>https://mat-lee.us/publications</loc></url>
   <url><loc>https://mat-lee.us/simple</loc></url>
   <url><loc>https://mat-lee.us/contact</loc></url>
-  <url><loc>https://mat-lee.us/labs</loc></url>
-  <url><loc>https://mat-lee.us/labs/tetris/move-generation</loc></url>
-  <url><loc>https://mat-lee.us/labs/tetris/local-minima</loc></url>
-  <url><loc>https://mat-lee.us/labs/tetris/reshaping-policy</loc></url>
+  <url><loc>https://mat-lee.us/writeups</loc></url>
+  <url><loc>https://mat-lee.us/writeups/tetris/move-generation</loc></url>
+  <url><loc>https://mat-lee.us/writeups/tetris/local-minima</loc></url>
+  <url><loc>https://mat-lee.us/writeups/tetris/reshaping-policy</loc></url>
 </urlset>

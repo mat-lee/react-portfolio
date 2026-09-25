@@ -8,14 +8,14 @@
     "github": "https://github.com/mat-lee/cards-and-games",
     "tags": ["Game Theory", "Nash Equilibria", "CFR", "Reinforcement Learning"],
     "status": "Ongoing project",
-    "labs": []
+    "writeups": []
   },
   {
     "id": "tetris-rl",
     "title": "Reinforcement Learning with TETRIS",
     "summary": "1v1 AlphaZero-style Tetris engine.",
     "github": "https://github.com/mat-lee/tetris-reinforcement-learning",
-    "labs": ["tetris-local-minima", "tetris-move-generation", "tetris-reshaping-policy"]
+    "writeups": ["tetris-local-minima", "tetris-move-generation", "tetris-reshaping-policy"]
   },
   {
     "id": "advice-aggregator",
@@ -26,7 +26,7 @@
     "github": "https://github.com/mat-lee/advice-website",
     "tags": ["Web scraping", "NLP", "Clustering", "Full-stack"],
     "status": "Ongoing project",
-    "labs": []
+    "writeups": []
   },
   {
     "id": "traffic-prediction",
@@ -37,6 +37,6 @@
     "github": "https://github.com/mat-lee/traffic-demo",
     "tags": ["Pandas", "Scikit-learn", "Streamlit", "Data Analysis"],
     "status": "Public interactive app",
-    "labs": []
+    "writeups": []
   }
 ]

@@ -28,17 +28,22 @@ export function About() {
           <ArrowLeft className="w-5 h-5" /> Back
         </button>
 
-        <h1 className="text-3xl font-bold tracking-tight mb-6">About Me</h1>
+        <div className="flex items-center gap-5 mb-6">
+          <img
+            src="/headshot.jpg"
+            alt="Matthew Lee"
+            className="w-20 h-20 rounded-full object-cover shrink-0"
+          />
+          <h1 className="text-3xl font-bold tracking-tight">About Me</h1>
+        </div>
         <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl mb-6">
-          I'm a student at the University of North Carolina at Chapel Hill, pursuing a dual major in
-          Computer Science and Mathematics.
+          Student at UNC Chapel Hill, pursuing a dual major in Computer Science and Mathematics. 
+          At heart, I'm a problem solver who enjoys interesting problems with interesting solutions.
         </p>
-        <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl mb-8">
-          I have a deep passion for learning and trying new things — while my main interests are
-          machine learning and artificial intelligence, there's always something new to explore in
-          the world of technology. I'm constantly seeking out new challenges and opportunities to
-          grow my skills, and I am passionate about using these technologies to solve real world
-          problems and create a meaningful impact in the world.
+        <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl mb-8"> 
+          I love learning new tools that I can use to problem solve, and I really value curiosity, and opportunities and challenges for growth.
+          My interests include (but are not limited to) Mathematics, Statistics, Machine Learning, AI, and Game Theory! 
+          Eventually I want to be able to use my problem solving skills to help solve major problems in our world.
         </p>
 
         {/* Editorial treatment: a plain letter-spaced line instead of pill

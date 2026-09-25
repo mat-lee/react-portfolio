@@ -3,7 +3,7 @@ import * as htmlToImage from "html-to-image";
 // Fully-composited (DOM + live Scene3D canvas, when present) capture of the
 // current page, for the kami transition's fold-away texture. Ported from
 // the origami-portfolio reference's foldSnapshotCache.ts, minus its
-// prewarm/cache layer — kami fires rarely enough (About/Labs entry and
+// prewarm/cache layer — kami fires rarely enough (About/Writeups entry and
 // exit only) that capturing fresh at trigger time is simple and fine.
 export async function captureDomSnapshot() {
   // html-to-image clones and serializes the DOM it's given, which it can't

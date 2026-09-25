@@ -1,18 +1,18 @@
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
-import { LABS_GROUPS } from "../../data/labsGroups";
-import { labsPosts } from "../../lib/labsPosts";
+import { WRITEUPS_GROUPS } from "../../data/writeupsGroups";
+import { writeupsPosts } from "../../lib/writeupsPosts";
 import { formatDate } from "../../lib/date";
 import { useDocumentMeta } from "../../lib/useDocumentMeta";
 
-// A post's group is its folder, if that folder is declared in LABS_GROUPS.
+// A post's group is its folder, if that folder is declared in WRITEUPS_GROUPS.
 function groupPosts(posts) {
   const grouped = new Map();
   const standalone = [];
   for (const post of posts) {
     const dir = post.id.includes("/") ? post.id.split("/")[0] : null;
-    if (dir && LABS_GROUPS[dir]) {
+    if (dir && WRITEUPS_GROUPS[dir]) {
       grouped.set(dir, [...(grouped.get(dir) ?? []), post]);
     } else {
       standalone.push(post);
@@ -24,13 +24,13 @@ function groupPosts(posts) {
 // Sub-posts within a group list newest first, same as the top-level feed.
 const readingOrder = (a, b) => new Date(b.frontmatter.date) - new Date(a.frontmatter.date);
 
-export function LabsIndex() {
+export function WriteupsIndex() {
   const navigate = useNavigate();
   useDocumentMeta(
-    "Labs — Matthew Lee",
+    "Writeups — Matthew Lee",
     "Explorations and technical writeups by Matthew Lee, including an AlphaZero-style Tetris AI."
   );
-  const posts = labsPosts.filter((p) => !p.frontmatter.draft);
+  const posts = writeupsPosts.filter((p) => !p.frontmatter.draft);
   const { grouped, standalone } = groupPosts(posts);
 
   const items = [
@@ -39,7 +39,7 @@ export function LabsIndex() {
       kind: "group",
       // A group is as recent as its newest child.
       date: new Date(Math.max(...children.map((c) => +new Date(c.frontmatter.date)))),
-      group: LABS_GROUPS[id],
+      group: WRITEUPS_GROUPS[id],
       children: children.sort(readingOrder),
     })),
   ].sort((a, b) => b.date - a.date);
@@ -59,7 +59,7 @@ export function LabsIndex() {
           <ArrowLeft className="w-5 h-5" /> Back
         </button>
 
-        <h1 className="text-3xl font-bold tracking-tight mb-2">Labs</h1>
+        <h1 className="text-3xl font-bold tracking-tight mb-2">Writeups</h1>
         <p className="text-slate-500 dark:text-slate-400 mb-10 text-lg">Explorations and writeups.</p>
 
         <ul className="space-y-10">
@@ -69,7 +69,7 @@ export function LabsIndex() {
                 <div className="text-base text-slate-500 dark:text-slate-400">{formatDate(item.date)}</div>
                 <div className="flex items-baseline gap-2 mt-1">
                   <Link
-                    to={`/labs/${item.post.id}`}
+                    to={`/writeups/${item.post.id}`}
                     className="text-2xl font-semibold hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                   >
                     {item.post.frontmatter.title}
@@ -91,7 +91,7 @@ export function LabsIndex() {
                   {item.children.map((child) => (
                     <li key={child.id}>
                       <Link
-                        to={`/labs/${child.id}`}
+                        to={`/writeups/${child.id}`}
                         className="text-lg font-medium hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                       >
                         {child.frontmatter.title}

@@ -1,17 +1,17 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
-import { getLabsPost } from "../../lib/labsPosts";
+import { getWriteupsPost } from "../../lib/writeupsPosts";
 import { formatDate } from "../../lib/date";
 import { useDocumentMeta } from "../../lib/useDocumentMeta";
-import "../../styles/labs-prose.css";
+import "../../styles/writeups-prose.css";
 
-export function LabsPost() {
+export function WriteupsPost() {
   const { "*": id } = useParams();
   const navigate = useNavigate();
-  const post = getLabsPost(id);
+  const post = getWriteupsPost(id);
   useDocumentMeta(
-    post ? `${post.frontmatter.title} — Labs — Matthew Lee` : "Labs — Matthew Lee",
+    post ? `${post.frontmatter.title} — Writeups — Matthew Lee` : "Writeups — Matthew Lee",
     post ? post.frontmatter.description : undefined
   );
 
@@ -24,7 +24,7 @@ export function LabsPost() {
         transition={{ duration: 0.5 }}
       >
         <button
-          onClick={() => navigate("/labs")}
+          onClick={() => navigate("/writeups")}
           className="flex items-center gap-2 mb-12 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
         >
           <ArrowLeft className="w-5 h-5" /> Back
@@ -48,7 +48,7 @@ export function LabsPost() {
               </div>
             </header>
 
-            <article className="labs-prose">
+            <article className="writeups-prose">
               <post.Component />
             </article>
           </>

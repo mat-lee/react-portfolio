@@ -1,6 +1,6 @@
 {
   "redirects": [
-    { "source": "/", "destination": "https://mat-lee.us/labs", "permanent": true },
-    { "source": "/:group/:slug", "destination": "https://mat-lee.us/labs/:group/:slug", "permanent": true }
+    { "source": "/", "destination": "https://mat-lee.us/writeups", "permanent": true },
+    { "source": "/:group/:slug", "destination": "https://mat-lee.us/writeups/:group/:slug", "permanent": true }
   ]
 }

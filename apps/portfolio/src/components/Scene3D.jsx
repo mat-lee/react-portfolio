@@ -202,11 +202,11 @@ export function Scene3D({ visible, leavingPage, onCraneClick }) {
             position={[1.0, 1.2, -1.0]}
             initialRotation={[0, 0.6, 0.02]}
             color="#3b82f6"
-            label="Labs"
+            label="Writeups"
             delay={0.44}
             isLeaving={leavingPage !== null}
             visible={visible}
-            onClick={(pos) => onCraneClick("/labs", pos)}
+            onClick={(pos) => onCraneClick("/writeups", pos)}
           />
           <Crane3D
             position={[3.0, 1.6, -0.5]}

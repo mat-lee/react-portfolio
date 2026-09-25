@@ -16,14 +16,14 @@ import { Publications } from "./pages/Publications";
 import { SimplePage } from "./pages/SimplePage";
 import { Contact, CONTACT_LINKS } from "./pages/Contact";
 import { ArrowLeft } from "lucide-react";
-import { LabsIndex } from "./pages/labs/LabsIndex";
-import { LabsPost } from "./pages/labs/LabsPost";
+import { WriteupsIndex } from "./pages/writeups/WriteupsIndex";
+import { WriteupsPost } from "./pages/writeups/WriteupsPost";
 
 // Shelved, not deleted: KamiTransition/triggerKami/TransitionProvider below
 // are all still fully wired up, just unreachable with this set empty — every
 // route now gets the plain fade. Re-enable a route by adding it back here
 // (kami's own accompanying pages' Back buttons would also need switching
-// back from a plain navigate() to triggerKami() — see About.jsx/LabsIndex.jsx).
+// back from a plain navigate() to triggerKami() — see About.jsx/WriteupsIndex.jsx).
 const KAMI_ROUTES = new Set([]);
 // How long the OTHER cranes get to visibly react (their own exit animation)
 // before the snapshot is taken and we navigate — shorter than the plain
@@ -151,8 +151,8 @@ function AppContent() {
                 <Route path="/simple" element={<SimplePage />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
-                <Route path="/labs" element={<LabsIndex />} />
-                <Route path="/labs/*" element={<LabsPost />} />
+                <Route path="/writeups" element={<WriteupsIndex />} />
+                <Route path="/writeups/*" element={<WriteupsPost />} />
               </Routes>
             </motion.div>
           </AnimatePresence>
