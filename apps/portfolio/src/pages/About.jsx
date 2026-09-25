@@ -29,11 +29,18 @@ export function About() {
         </button>
 
         <div className="flex items-center gap-5 mb-6">
-          <img
-            src="/headshot.jpg"
-            alt="Matthew Lee"
-            className="w-20 h-20 rounded-full object-cover shrink-0"
-          />
+          {/* The source photo is a wide landscape shot with the face taking
+              up a small fraction of it — object-cover alone only crops the
+              sides here (still shows full height), so it stays scaled up
+              and repositioned to actually crop in on the face. */}
+          <div className="w-32 h-32 rounded-full overflow-hidden shrink-0">
+            <img
+              src="/headshot.jpg"
+              alt="Matthew Lee"
+              className="w-full h-full object-cover"
+              style={{ transform: "scale(2.4)", transformOrigin: "43% 38%" }}
+            />
+          </div>
           <h1 className="text-3xl font-bold tracking-tight">About Me</h1>
         </div>
         <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl mb-6">
