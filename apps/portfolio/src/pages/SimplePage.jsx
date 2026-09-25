@@ -1,10 +1,9 @@
 import { useDocumentMeta } from "../lib/useDocumentMeta";
 import { CONTACT_LINKS } from "./Contact";
+import { BIO_PARAGRAPHS, SKILLS } from "../data/bio";
 import projectsData from "../data/projects.json";
 import writeupsData from "../data/writeups.json";
 import publicationsData from "../data/publications.json";
-
-const SKILLS = ["Python", "PyTorch", "TensorFlow", "Pandas", "Scikit-learn", "Frontend", "Backend"];
 const NAV = [
   { href: "#about", label: "About" },
   { href: "#projects", label: "Projects" },
@@ -55,17 +54,8 @@ export function SimplePage() {
           <h2 className="text-[13px] uppercase tracking-[0.08em] font-semibold text-slate-500 dark:text-slate-400 mb-4">
             About
           </h2>
-          <p className="text-base leading-relaxed mb-3.5">
-            I'm a student at the University of North Carolina at Chapel Hill, pursuing a dual major in Computer
-            Science and Mathematics.
-          </p>
-          <p className="text-base leading-relaxed mb-4">
-            I have a deep passion for learning and trying new things — while my main interests are machine
-            learning and artificial intelligence, there's always something new to explore in the world of
-            technology. I'm constantly seeking out new challenges and opportunities to grow my skills, and I am
-            passionate about using these technologies to solve real world problems and create a meaningful impact
-            in the world.
-          </p>
+          <p className="text-base leading-relaxed mb-3.5">{BIO_PARAGRAPHS[0]}</p>
+          <p className="text-base leading-relaxed mb-4">{BIO_PARAGRAPHS[1]}</p>
           <div className="font-mono text-[13px] text-slate-500 dark:text-slate-400">{SKILLS.join(" · ")}</div>
         </section>
         <hr className="border-t border-slate-200 dark:border-slate-800 mb-10" />

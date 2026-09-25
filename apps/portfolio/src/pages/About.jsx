@@ -3,8 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import { useDocumentMeta } from "../lib/useDocumentMeta";
 import { CONTACT_LINKS } from "./Contact";
-
-const SKILLS = ["Python", "PyTorch", "TensorFlow", "Pandas", "Scikit-learn", "Frontend", "Backend"];
+import { BIO_PARAGRAPHS, SKILLS } from "../data/bio";
 
 export function About() {
   const navigate = useNavigate();
@@ -43,15 +42,8 @@ export function About() {
           </div>
           <h1 className="text-3xl font-bold tracking-tight">About Me</h1>
         </div>
-        <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl mb-6">
-          Student at UNC Chapel Hill, pursuing a dual major in Computer Science and Mathematics. 
-          At heart, I'm a problem solver who enjoys interesting problems with interesting solutions.
-        </p>
-        <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl mb-8"> 
-          I love learning new tools that I can use to problem solve, and I really value curiosity, and opportunities and challenges for growth.
-          My interests include (but are not limited to) Mathematics, Statistics, Machine Learning, AI, and Game Theory! 
-          Eventually I want to be able to use my problem solving skills to help solve major problems in our world.
-        </p>
+        <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl mb-6">{BIO_PARAGRAPHS[0]}</p>
+        <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl mb-8">{BIO_PARAGRAPHS[1]}</p>
 
         {/* Editorial treatment: a plain letter-spaced line instead of pill
             badges — quieter, and one less shape competing with the crane's
