@@ -23,12 +23,12 @@ export function SimplePage() {
       <div className="max-w-2xl mx-auto px-6 py-16 md:py-20">
         <header className="mb-10">
           <div className="flex items-center gap-4 mb-1.5">
-            <div className="w-20 h-20 rounded-full overflow-hidden shrink-0">
+            <div className="w-64 h-64 rounded-full overflow-hidden shrink-0">
               <img
                 src="/headshot.jpg"
                 alt="Matthew Lee"
                 className="w-full h-full object-cover"
-                style={{ transform: "scale(2.4)", transformOrigin: "43% 38%" }}
+                style={{ transform: "scale(3)", transformOrigin: "48% 48%" }}
               />
             </div>
             <h1 className="text-[28px] font-bold tracking-tight">Matthew Lee</h1>

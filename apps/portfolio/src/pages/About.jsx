@@ -32,12 +32,12 @@ export function About() {
               up a small fraction of it — object-cover alone only crops the
               sides here (still shows full height), so it stays scaled up
               and repositioned to actually crop in on the face. */}
-          <div className="w-32 h-32 rounded-full overflow-hidden shrink-0">
+          <div className="w-64 h-64 rounded-full overflow-hidden shrink-0">
             <img
               src="/headshot.jpg"
               alt="Matthew Lee"
               className="w-full h-full object-cover"
-              style={{ transform: "scale(2.4)", transformOrigin: "43% 38%" }}
+              style={{ transform: "scale(3)", transformOrigin: "48% 48%" }}
             />
           </div>
           <h1 className="text-3xl font-bold tracking-tight">About Me</h1>
