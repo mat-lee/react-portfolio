@@ -36,8 +36,8 @@ export class AudioSystem {
     const gain = ctx.createGain();
 
     osc.type = "sine";
-    osc.frequency.setValueAtTime(2000 * p, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(4000 * p, ctx.currentTime + 0.1);
+    osc.frequency.setValueAtTime(1200 * p, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(2400 * p, ctx.currentTime + 0.1);
 
     gain.gain.setValueAtTime(0, ctx.currentTime);
     gain.gain.linearRampToValueAtTime(0.02, ctx.currentTime + 0.02);

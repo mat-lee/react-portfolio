@@ -27,12 +27,16 @@ export function About() {
           <ArrowLeft className="w-5 h-5" /> Back
         </button>
 
-        <div className="flex items-center gap-5 mb-6">
+        {/* Photo sits beside the whole intro (heading + bio), not just the
+            heading on its own — pairing a large photo with one line of text
+            next to it read as top-heavy/lopsided; giving it a few lines of
+            company balances it out. Stacks on narrow screens. */}
+        <div className="flex flex-col sm:flex-row items-start gap-6 mb-8">
           {/* The source photo is a wide landscape shot with the face taking
               up a small fraction of it — object-cover alone only crops the
               sides here (still shows full height), so it stays scaled up
               and repositioned to actually crop in on the face. */}
-          <div className="w-64 h-64 rounded-full overflow-hidden shrink-0">
+          <div className="w-36 h-36 rounded-full overflow-hidden shrink-0">
             <img
               src="/headshot.jpg"
               alt="Matthew Lee"
@@ -40,10 +44,12 @@ export function About() {
               style={{ transform: "scale(3)", transformOrigin: "48% 48%" }}
             />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight">About Me</h1>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight mb-3">About Me</h1>
+            <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed mb-4">{BIO_PARAGRAPHS[0]}</p>
+            <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">{BIO_PARAGRAPHS[1]}</p>
+          </div>
         </div>
-        <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl mb-6">{BIO_PARAGRAPHS[0]}</p>
-        <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl mb-8">{BIO_PARAGRAPHS[1]}</p>
 
         {/* Editorial treatment: a plain letter-spaced line instead of pill
             badges — quieter, and one less shape competing with the crane's

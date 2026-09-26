@@ -22,8 +22,10 @@ export function SimplePage() {
     <div className="w-full min-h-screen bg-[#FBFBF9] dark:bg-[#020617] text-slate-900 dark:text-slate-100">
       <div className="max-w-2xl mx-auto px-6 py-16 md:py-20">
         <header className="mb-10">
-          <div className="flex items-center gap-4 mb-1.5">
-            <div className="w-64 h-64 rounded-full overflow-hidden shrink-0">
+          {/* Photo paired with name + tagline together, not just the name —
+              a big photo next to one short line of text read as lopsided. */}
+          <div className="flex items-center gap-5 mb-5">
+            <div className="w-36 h-36 rounded-full overflow-hidden shrink-0">
               <img
                 src="/headshot.jpg"
                 alt="Matthew Lee"
@@ -31,11 +33,13 @@ export function SimplePage() {
                 style={{ transform: "scale(3)", transformOrigin: "48% 48%" }}
               />
             </div>
-            <h1 className="text-[28px] font-bold tracking-tight">Matthew Lee</h1>
+            <div>
+              <h1 className="text-[28px] font-bold tracking-tight mb-1.5">Matthew Lee</h1>
+              <p className="text-slate-500 dark:text-slate-400 text-base">
+                Computer Science &amp; Mathematics @ UNC Chapel Hill
+              </p>
+            </div>
           </div>
-          <p className="text-slate-500 dark:text-slate-400 text-base mb-5">
-            Computer Science &amp; Mathematics @ UNC Chapel Hill
-          </p>
           <nav className="flex flex-wrap gap-4 text-sm">
             {NAV.map(({ href, label }) => (
               <a
