@@ -18,6 +18,7 @@ import { Contact, CONTACT_LINKS } from "./pages/Contact";
 import { ArrowLeft } from "lucide-react";
 import { WriteupsIndex } from "./pages/writeups/WriteupsIndex";
 import { WriteupsPost } from "./pages/writeups/WriteupsPost";
+import { useIsMobile } from "./lib/useIsMobile";
 
 // Shelved, not deleted: KamiTransition/triggerKami/TransitionProvider below
 // are all still fully wired up, just unreachable with this set empty — every
@@ -41,6 +42,14 @@ function AppContent() {
   const location = useLocation();
   const navigate = useNavigate();
   const isHome = location.pathname === "/";
+  // The 3D crane scene is calibrated for a wide desktop viewport — on a
+  // phone most of the 5 cranes land off-screen (confirmed directly: only
+  // 2 of 5 were reachable at 390px wide). Rather than re-tune an entire
+  // touch-driven 3D composition for narrow screens, Home just shows the
+  // Simple page's content there instead — `showScene` is the one flag
+  // everything below branches on.
+  const isMobile = useIsMobile();
+  const showScene = isHome && !isMobile;
 
   // Non-null while a crane's exit is playing, between click and the actual
   // navigate() call below. Passed to Scene3D as `leavingPage` so every
@@ -55,8 +64,8 @@ function AppContent() {
   // open — replaces navigating to /contact for that one entry point.
   const [showContactCard, setShowContactCard] = useState(false);
   useEffect(() => {
-    if (!isHome) setShowContactCard(false);
-  }, [isHome]);
+    if (!showScene) setShowContactCard(false);
+  }, [showScene]);
 
   const triggerKami = async (route, clickPos) => {
     if (leavingPage || kami) return;
@@ -113,9 +122,9 @@ function AppContent() {
 
   return (
     <div className="relative min-h-screen">
-      <Scene3D visible={isHome} leavingPage={leavingPage} onCraneClick={handleCraneClick} />
+      <Scene3D visible={showScene} leavingPage={leavingPage} onCraneClick={handleCraneClick} />
 
-      <ThemeToggle simple={!isHome} />
+      <ThemeToggle simple={!showScene} />
       <ThemeTransition />
 
       {location.pathname === "/simple" && (
@@ -142,10 +151,13 @@ function AppContent() {
               // meant to read as an immediate plain alternative, not another
               // animated destination.
               transition={{ duration: location.pathname === "/simple" ? 0 : 0.25 }}
-              className={isHome ? "pointer-events-none w-full h-full" : "pointer-events-auto w-full h-full"}
+              className={showScene ? "pointer-events-none w-full h-full" : "pointer-events-auto w-full h-full"}
             >
               <Routes location={location}>
-                <Route path="/" element={<Home />} />
+                {/* On mobile, "/" renders the Simple page's real content
+                    directly (not a redirect to /simple) — there's no 3D
+                    scene to return to from a /simple back button here. */}
+                <Route path="/" element={isMobile ? <SimplePage /> : <Home />} />
                 <Route path="/projects" element={<Projects />} />
                 <Route path="/publications" element={<Publications />} />
                 <Route path="/simple" element={<SimplePage />} />
@@ -165,7 +177,7 @@ function AppContent() {
         mat-lee
       </div>
 
-      {isHome && (
+      {showScene && (
         <a
           href="https://sketchfab.com/3d-models/3d-origami-crane-38fe6bfec0664af3b7660b2d18cfaf94"
           target="_blank"
@@ -179,7 +191,7 @@ function AppContent() {
       {/* Simple Version and Contact used to be their own grounded 3D objects
           (see Scene3D) — shelved for now in favor of plain clickable text,
           smaller and pushed to the sides rather than sitting in the scene. */}
-      {isHome && (
+      {showScene && (
         // Instant, no fly-away/fade — this isn't a crane, and the simple
         // page is meant to feel like flipping a switch, not a transition.
         <button
@@ -189,7 +201,7 @@ function AppContent() {
           Simple Version
         </button>
       )}
-      {isHome && (
+      {showScene && (
         <div className="fixed bottom-14 right-6 z-40 flex flex-col items-end gap-2">
           {showContactCard && (
             <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400">

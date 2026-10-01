@@ -4,6 +4,7 @@
 export const BIO_PARAGRAPHS = [
   "Student at UNC Chapel Hill, pursuing a dual major in Computer Science and Mathematics. At heart, I'm a problem solver who enjoys interesting problems with interesting solutions.",
   "I love learning new tools that I can use to problem solve, and I really value curiosity, and opportunities and challenges for growth. My interests include (but are not limited to) Mathematics, Statistics, Machine Learning, AI, and Game Theory! Eventually I want to be able to use my problem solving skills to help solve major problems in our world.",
+  "Outside of working, I love travelling and hiking, playing piano and guitar, sports, games, origami, and journaling!"
 ];
 
 export const SKILLS = ["Python", "PyTorch", "TensorFlow", "Pandas", "Scikit-learn", "Frontend", "Backend"];

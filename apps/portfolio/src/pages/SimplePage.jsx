@@ -58,8 +58,11 @@ export function SimplePage() {
           <h2 className="text-[13px] uppercase tracking-[0.08em] font-semibold text-slate-500 dark:text-slate-400 mb-4">
             About
           </h2>
-          <p className="text-base leading-relaxed mb-3.5">{BIO_PARAGRAPHS[0]}</p>
-          <p className="text-base leading-relaxed mb-4">{BIO_PARAGRAPHS[1]}</p>
+          {BIO_PARAGRAPHS.map((p, i) => (
+            <p key={i} className="text-base leading-relaxed mb-3.5">
+              {p}
+            </p>
+          ))}
           <div className="font-mono text-[13px] text-slate-500 dark:text-slate-400">{SKILLS.join(" · ")}</div>
         </section>
         <hr className="border-t border-slate-200 dark:border-slate-800 mb-10" />

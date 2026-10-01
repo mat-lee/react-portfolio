@@ -46,8 +46,14 @@ export function About() {
           </div>
           <div>
             <h1 className="text-3xl font-bold tracking-tight mb-3">About Me</h1>
-            <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed mb-4">{BIO_PARAGRAPHS[0]}</p>
-            <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">{BIO_PARAGRAPHS[1]}</p>
+            {BIO_PARAGRAPHS.map((p, i) => (
+              <p
+                key={i}
+                className={`text-lg text-slate-600 dark:text-slate-400 leading-relaxed ${i < BIO_PARAGRAPHS.length - 1 ? "mb-4" : ""}`}
+              >
+                {p}
+              </p>
+            ))}
           </div>
         </div>
 

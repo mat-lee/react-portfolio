@@ -52,13 +52,15 @@ export function Projects() {
               >
                 {/* items-center on the header row (not the whole li) so the
                     icon aligns with the title's own line box via flexbox's
-                    native vertical centering. */}
-                <div className="flex items-center justify-between gap-4">
+                    native vertical centering. Stacks on narrow screens — a
+                    long title fighting for space with the links on one
+                    fixed row wrapped badly on mobile. */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
                   <div className="flex items-center">
                     <Tetrahedron color={ACCENTS[i % ACCENTS.length]} />
                     <h3 className="text-xl font-semibold">{project.title}</h3>
                   </div>
-                  <div className="flex items-center gap-4 shrink-0 text-sm">
+                  <div className="flex items-center gap-4 shrink-0 text-sm ml-9 sm:ml-0">
                     {project.link && (
                       <a
                         href={project.link}
